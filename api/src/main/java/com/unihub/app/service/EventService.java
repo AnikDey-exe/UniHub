@@ -23,7 +23,7 @@ public class EventService {
     public Event saveEvent(Event event) {
         Event savedEvent = eventRepo.save(event);
 
-        log.info("Employee with id: {} saved successfully", event.getName());
+        log.info("Event with id: {} saved successfully", event.getName());
         return savedEvent;
     }
 }
