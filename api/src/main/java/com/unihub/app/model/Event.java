@@ -28,4 +28,8 @@ public class Event {
 
     @Column(nullable = false)
     private int capacity;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private AppUser appUser;
 }

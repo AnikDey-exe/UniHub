@@ -1,6 +1,8 @@
 package com.unihub.app.service;
 
+import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
+import com.unihub.app.repository.AppUserRepo;
 import com.unihub.app.repository.EventRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,12 +18,22 @@ import java.util.List;
 public class EventService {
     @Autowired
     private EventRepo eventRepo;
+    @Autowired
+    private AppUserRepo appUserRepo;
 
     public List<Event> getAllEvents(){
         return eventRepo.findAll();
     }
 
     public Event saveEvent(Event event) {
+        AppUser user = null;
+        if (event.getAppUser() != null) {
+            user = appUserRepo.findById(event.getAppUser().getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        }
+        if (user != null) {
+            event.setAppUser(user);
+            user.getEventsCreated().add(event);
+        }
         Event savedEvent = eventRepo.save(event);
 
         log.info("Event with id: {} saved successfully", event.getName());

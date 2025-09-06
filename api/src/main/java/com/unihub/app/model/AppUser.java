@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -32,4 +34,7 @@ public class AppUser {
     private String about;
 
     private String profilePicture;
+
+    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    List<Event> eventsCreated;
 }
