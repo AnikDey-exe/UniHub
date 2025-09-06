@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+    id: 1757181784923-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: phone_number
+            type: VARCHAR(255)
+        tableName: app_user
+

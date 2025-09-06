@@ -19,6 +19,9 @@ public class AppUser {
     private String email;
 
     @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column(nullable = false)
     private String firstName;
 
     private String middleName;

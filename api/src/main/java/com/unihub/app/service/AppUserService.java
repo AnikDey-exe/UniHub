@@ -23,7 +23,7 @@ public class AppUserService {
     public AppUser saveUser(AppUser user) {
         AppUser savedUser = appUserRepo.save(user);
 
-        log.info("User with id: {} saved successfully", user.getFirstName());
+        log.info("User with name: {} saved successfully", user.getFirstName());
         return savedUser;
     }
 }

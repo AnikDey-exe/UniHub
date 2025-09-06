@@ -1,0 +1,89 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: anik
+      changes:
+        - createTable:
+            tableName: app_user
+            schemaName: events
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: middle_name
+                  type: VARCHAR(255)
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: about
+                  type: VARCHAR(255)
+              - column:
+                  name: profile_picture
+                  type: VARCHAR(255)
+
+        - createIndex:
+            indexName: idx_app_user_email
+            tableName: app_user
+            schemaName: events
+            unique: true
+            columns:
+              - column:
+                  name: email
+
+  - changeSet:
+      id: 2
+      author: anik
+      changes:
+        - createTable:
+            tableName: event
+            schemaName: events
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: location
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: capacity
+                  type: INT
+                  constraints:
+                    nullable: false
