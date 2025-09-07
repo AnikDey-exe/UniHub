@@ -9,18 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AppUserSummaryDTO {
     private Integer id;
-
     private String email;
-
     private String phoneNumber;
-
     private String firstName;
-
     private String middleName;
-
     private String lastName;
-
     private String about;
-
     private String profilePicture;
 }

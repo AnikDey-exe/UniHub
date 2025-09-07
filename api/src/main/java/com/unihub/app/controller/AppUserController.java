@@ -1,5 +1,6 @@
 package com.unihub.app.controller;
 
+import com.unihub.app.dto.AppUserDTO;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.service.AppUserService;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,12 @@ public class AppUserController {
     private AppUserService appUserService;
 
     @GetMapping("/")
-    public ResponseEntity<List<AppUser>> getUsers() {
+    public ResponseEntity<List<AppUserDTO>> getUsers() {
         return ResponseEntity.ok().body(appUserService.getAllUsers());
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AppUser> register(@RequestBody AppUser user) {
+    public ResponseEntity<AppUserDTO> register(@RequestBody AppUser user) {
         return ResponseEntity.ok().body(appUserService.saveUser(user));
     }
 }

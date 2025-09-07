@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +22,15 @@ public class EventService {
     private EventRepo eventRepo;
     @Autowired
     private AppUserRepo appUserRepo;
+    @Autowired
+    private DTOMapper dtoMapper;
 
     public List<EventDTO> getAllEvents(){
         List<Event> events = eventRepo.findAll();
         List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
 
         for (Event event : events) {
-            eventDTOs.add(DTOMapper.toEventDTO(event));
+            eventDTOs.add(dtoMapper.toEventDTO(event));
         }
 
         return eventDTOs;
@@ -45,7 +46,7 @@ public class EventService {
             user.getEventsCreated().add(event);
         }
         Event savedEvent = eventRepo.save(event);
-        EventDTO eventDTO = DTOMapper.toEventDTO(event);
+        EventDTO eventDTO = dtoMapper.toEventDTO(event);
         log.info("Event with id: {} saved successfully", event.getName());
         return eventDTO;
     }

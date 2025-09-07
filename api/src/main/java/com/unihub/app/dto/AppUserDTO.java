@@ -12,20 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 public class AppUserDTO {
     private Integer id;
-
     private String email;
-
     private String phoneNumber;
-
     private String firstName;
-
     private String middleName;
-
     private String lastName;
-
     private String about;
-
     private String profilePicture;
-
     List<EventSummaryDTO> eventsCreated;
 }
