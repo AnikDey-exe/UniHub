@@ -1,5 +1,6 @@
 package com.unihub.app.controller;
 
+import com.unihub.app.dto.EventDTO;
 import com.unihub.app.model.Event;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,12 @@ public class EventController {
     private EventService eventService;
 
     @GetMapping("/")
-    public ResponseEntity<List<Event>> getEvents() {
+    public ResponseEntity<List<EventDTO>> getEvents() {
         return ResponseEntity.ok().body(eventService.getAllEvents());
     }
 
     @PostMapping("/")
-    public ResponseEntity<Event> saveEvent(@RequestBody Event event) {
+    public ResponseEntity<EventDTO> saveEvent(@RequestBody Event event) {
         return ResponseEntity.ok().body(eventService.saveEvent(event));
     }
 }
