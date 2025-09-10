@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,16 +39,30 @@ public class EventService {
 
     public EventDTO saveEvent(Event event) {
         AppUser user = null;
-        if (event.getAppUser() != null) {
-            user = appUserRepo.findById(event.getAppUser().getId()).orElseThrow(() -> new RuntimeException("User not found"));
+        if (event.getCreator() != null) {
+            user = appUserRepo.findById(event.getCreator().getId()).orElseThrow(() -> new RuntimeException("User not found"));
         }
         if (user != null) {
-            event.setAppUser(user);
+            event.setCreator(user);
             user.getEventsCreated().add(event);
         }
         Event savedEvent = eventRepo.save(event);
         EventDTO eventDTO = dtoMapper.toEventDTO(event);
         log.info("Event with id: {} saved successfully", event.getName());
         return eventDTO;
+    }
+
+    @Transactional
+    public void rsvpEvent(Integer eventId, String userEmail) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+        AppUser attendee = appUserRepo.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (event.getAttendees().contains(attendee)) throw new RuntimeException("User is already registered for event.");
+        if (event.getAttendees().size() >= event.getCapacity()) throw new RuntimeException("Event is at full capacity.");
+
+        event.getAttendees().add(attendee);
+        attendee.getEventsAttended().add(event);
+
+        eventRepo.save(event);
     }
 }

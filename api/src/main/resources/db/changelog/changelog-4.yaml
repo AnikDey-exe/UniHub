@@ -1,0 +1,19 @@
+databaseChangeLog:
+- changeSet:
+    id: 1757351956186-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: creator_user_id
+            type: INTEGER
+        tableName: event
+- changeSet:
+    id: 1757351956186-2
+    author: anikdey (generated)
+    changes:
+    - dropColumn:
+        columnName: user_id
+        tableName: event
+

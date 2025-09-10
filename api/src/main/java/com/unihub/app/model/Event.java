@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -30,6 +32,15 @@ public class Event {
     private int capacity;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private AppUser appUser;
+    @JoinColumn(name = "creator_user_id")
+    private AppUser creator;
+
+    @ManyToMany
+    @JoinTable(
+            name = "attendee",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
+    )
+    private Set<AppUser> attendees;
+
 }

@@ -1,0 +1,49 @@
+databaseChangeLog:
+- changeSet:
+    id: 1757461854897-1
+    author: anikdey (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: attendeePK
+            name: event_id
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: attendeePK
+            name: attendee_user_id
+            type: INTEGER
+        tableName: attendee
+- changeSet:
+    id: 1757461854897-2
+    author: anikdey (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: attendee_user_id
+        baseTableName: attendee
+        constraintName: FKl2eu2iphrl2diwvxw3hrnibyu
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: app_user
+        validate: true
+- changeSet:
+    id: 1757461854897-3
+    author: anikdey (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: event_id
+        baseTableName: attendee
+        constraintName: FKtlojoyim69p3784m18rsocl33
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: event
+        validate: true
+

@@ -11,11 +11,13 @@ import java.util.List;
 public interface DTOMapper {
 
     // Event -> EventDTO
-    @Mapping(target = "appUser", source = "appUser")
+    @Mapping(target = "creator", source = "creator")
+    @Mapping(target = "attendees", source = "attendees")
     EventDTO toEventDTO(Event event);
 
     // AppUser -> AppUserDTO
     @Mapping(target = "eventsCreated", source = "eventsCreated")
+    @Mapping(target = "eventsAttended", source = "eventsAttended")
     AppUserDTO toAppUserDTO(AppUser appUser);
 
     // Smaller objects

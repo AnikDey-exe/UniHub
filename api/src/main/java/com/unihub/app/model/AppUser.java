@@ -35,6 +35,9 @@ public class AppUser {
 
     private String profilePicture;
 
-    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     List<Event> eventsCreated;
+
+    @ManyToMany(mappedBy = "attendees")
+    List<Event> eventsAttended;
 }

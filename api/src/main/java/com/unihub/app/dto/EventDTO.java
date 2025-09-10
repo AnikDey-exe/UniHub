@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +16,7 @@ public class EventDTO {
     private String description;
     private String location;
     private int capacity;
-    private AppUserSummaryDTO appUser;
+    private AppUserSummaryDTO creator;
+    private Set<AppUserSummaryDTO> attendees;
 }
 

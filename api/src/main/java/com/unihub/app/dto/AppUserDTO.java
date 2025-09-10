@@ -20,4 +20,5 @@ public class AppUserDTO {
     private String about;
     private String profilePicture;
     List<EventSummaryDTO> eventsCreated;
+    List<EventSummaryDTO> eventsAttended;
 }
