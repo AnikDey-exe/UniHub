@@ -20,6 +20,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(UserAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyRegistered(UserAlreadyRegisteredException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.badRequest().body(error);
+    }
+
     @ExceptionHandler(CapacityLimitReachedException.class)
     public ResponseEntity<ErrorResponse> handleCapacityLimitReached(CapacityLimitReachedException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());

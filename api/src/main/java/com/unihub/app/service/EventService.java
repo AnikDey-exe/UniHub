@@ -2,7 +2,10 @@ package com.unihub.app.service;
 
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.exception.CapacityLimitReachedException;
 import com.unihub.app.exception.EventNotFoundException;
+import com.unihub.app.exception.UserAlreadyRegisteredException;
+import com.unihub.app.exception.UserNotFoundException;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
 import com.unihub.app.repository.AppUserRepo;
@@ -48,7 +51,7 @@ public class EventService {
     public EventDTO saveEvent(Event event) {
         AppUser user = null;
         if (event.getCreator() != null) {
-            user = appUserRepo.findById(event.getCreator().getId()).orElseThrow(() -> new RuntimeException("User not found"));
+            user = appUserRepo.findById(event.getCreator().getId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         }
         if (user != null) {
             event.setCreator(user);
@@ -62,11 +65,11 @@ public class EventService {
 
     @Transactional
     public void rsvpEvent(Integer eventId, String userEmail) {
-        Event event = eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
-        AppUser attendee = appUserRepo.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+        AppUser attendee = appUserRepo.findByEmail(userEmail).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (event.getAttendees().contains(attendee)) throw new RuntimeException("User is already registered for event.");
-        if (event.getAttendees().size() >= event.getCapacity()) throw new RuntimeException("Event is at full capacity.");
+        if (event.getAttendees().contains(attendee)) throw new UserAlreadyRegisteredException("User is already registered for event.");
+        if (event.getAttendees().size() >= event.getCapacity()) throw new CapacityLimitReachedException("Event is at full capacity.");
 
         event.getAttendees().add(attendee);
         attendee.getEventsAttended().add(event);
