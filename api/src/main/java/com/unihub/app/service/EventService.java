@@ -2,6 +2,7 @@ package com.unihub.app.service;
 
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.exception.EventNotFoundException;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
 import com.unihub.app.repository.AppUserRepo;
@@ -38,7 +39,7 @@ public class EventService {
     }
 
     public EventDTO getEvent(Integer eventId) {
-        Event event = eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
         EventDTO eventDto = dtoMapper.toEventDTO(event);
 
         return eventDto;
