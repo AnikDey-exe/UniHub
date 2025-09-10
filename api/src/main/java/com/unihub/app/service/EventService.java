@@ -37,6 +37,13 @@ public class EventService {
         return eventDTOs;
     }
 
+    public EventDTO getEvent(Integer eventId) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+        EventDTO eventDto = dtoMapper.toEventDTO(event);
+
+        return eventDto;
+    }
+
     public EventDTO saveEvent(Event event) {
         AppUser user = null;
         if (event.getCreator() != null) {

@@ -23,6 +23,9 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.getAllEvents());
     }
 
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEvent(eventId)); }
+
     @PostMapping("/")
     public ResponseEntity<EventDTO> saveEvent(@RequestBody Event event) {
         return ResponseEntity.ok().body(eventService.saveEvent(event));
