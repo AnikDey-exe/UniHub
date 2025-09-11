@@ -2,6 +2,7 @@ package com.unihub.app.controller;
 
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.RsvpRequest;
+import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.model.Event;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,9 @@ public class EventController {
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEvent(eventId)); }
+
+    @PutMapping("/{eventId}")
+    public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 
     @PostMapping("/")
     public ResponseEntity<EventDTO> saveEvent(@RequestBody Event event) {

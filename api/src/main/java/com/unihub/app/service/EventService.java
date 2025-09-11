@@ -2,6 +2,7 @@ package com.unihub.app.service;
 
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.exception.CapacityLimitReachedException;
 import com.unihub.app.exception.EventNotFoundException;
 import com.unihub.app.exception.UserAlreadyRegisteredException;
@@ -46,6 +47,19 @@ public class EventService {
         EventDTO eventDto = dtoMapper.toEventDTO(event);
 
         return eventDto;
+    }
+
+    public EventDTO updateEvent(Integer eventId, UpdateEventRequest toUpdate) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+
+        if (toUpdate.getName() != null) event.setName(toUpdate.getName());
+        if (toUpdate.getType() != null) event.setType(toUpdate.getType());
+        if (toUpdate.getDescription() != null) event.setDescription(toUpdate.getDescription());
+        if (toUpdate.getLocation() != null) event.setLocation(toUpdate.getLocation());
+        if (toUpdate.getCapacity() != null) event.setCapacity(toUpdate.getCapacity());
+
+        Event updatedEvent = eventRepo.save(event);
+        return dtoMapper.toEventDTO(updatedEvent);
     }
 
     public EventDTO saveEvent(Event event) {
