@@ -1,0 +1,30 @@
+databaseChangeLog:
+- changeSet:
+    id: 1757562136320-1
+    author: anikdey (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: collegePK
+            name: id
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: location
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: thumbnail
+            type: VARCHAR(255)
+        tableName: college
+

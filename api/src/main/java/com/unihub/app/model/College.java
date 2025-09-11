@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
-import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,8 +13,8 @@ import java.util.Set;
 @ToString
 @Entity
 
-@Table(name = "event", schema = "events")
-public class Event {
+@Table(name = "college", schema = "events")
+public class College {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,28 +23,9 @@ public class Event {
     private String name;
 
     @Column(nullable = false)
-    private String type;
-
-    private String description;
-
-    @Column(nullable = false)
     private String location;
 
-    @Column(nullable = false)
-    private int capacity;
-
-    @ManyToOne
-    @JoinColumn(name = "creator_user_id")
-    private AppUser creator;
-
-    @ManyToMany
-    @JoinTable(
-            name = "attendee",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
-    )
-    @ToString.Exclude
-    private Set<AppUser> attendees;
+    private String thumbnail;
 
     @Override
     public final boolean equals(Object o) {
@@ -54,8 +34,8 @@ public class Event {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Event event = (Event) o;
-        return getId() != null && Objects.equals(getId(), event.getId());
+        College college = (College) o;
+        return getId() != null && Objects.equals(getId(), college.getId());
     }
 
     @Override
