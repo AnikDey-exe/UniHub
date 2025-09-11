@@ -1,10 +1,14 @@
 package com.unihub.app.dto;
 
+import com.unihub.app.dto.request.UpdateUserRequest;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
 
+import org.hibernate.sql.Update;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
 import java.util.List;
 
 @Mapper(componentModel = "spring") // lets Spring inject it
