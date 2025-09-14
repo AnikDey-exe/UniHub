@@ -30,7 +30,7 @@ public class EventController {
     @PutMapping("/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 
-    @PostMapping("/")
+    @PostMapping("/create")
     public ResponseEntity<EventDTO> saveEvent(@RequestBody Event event) {
         return ResponseEntity.ok().body(eventService.saveEvent(event));
     }
