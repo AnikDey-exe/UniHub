@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+    id: 1757806236320-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: password
+            type: VARCHAR(255)
+        tableName: app_user
+
