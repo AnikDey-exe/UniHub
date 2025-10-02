@@ -52,6 +52,10 @@ public class AppUser implements UserDetails {
     @ToString.Exclude
     List<Event> eventsAttended;
 
+    @ManyToOne
+    @JoinColumn(name = "college")
+    private College college;
+
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;

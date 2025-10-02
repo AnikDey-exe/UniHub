@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1759373606826-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: college
+            type: INTEGER
+        tableName: app_user
+

@@ -2,6 +2,7 @@ package com.unihub.app.dto;
 
 import com.unihub.app.dto.request.UpdateUserRequest;
 import com.unihub.app.model.AppUser;
+import com.unihub.app.model.College;
 import com.unihub.app.model.Event;
 
 import org.hibernate.sql.Update;
@@ -22,12 +23,20 @@ public interface DTOMapper {
     // AppUser -> AppUserDTO
     @Mapping(target = "eventsCreated", source = "eventsCreated")
     @Mapping(target = "eventsAttended", source = "eventsAttended")
+    @Mapping(target = "college", source = "college")
     AppUserDTO toAppUserDTO(AppUser appUser);
+
+    @Mapping(target = "students", source = "students")
+    CollegeDTO toCollegeDTO(College college);
 
     // Smaller objects
     AppUserSummaryDTO toAppUserSummaryDTO(AppUser appUser);
 
+    List<AppUserSummaryDTO> toAppSummaryDTO(List<AppUser> appUsers);
+
     EventSummaryDTO toEventSummaryDTO(Event event);
 
     List<EventSummaryDTO> toEventSummaryDTO(List<Event> events);
+
+    CollegeSummaryDTO toCollegeSummaryDTO(College college);
 }

@@ -1,6 +1,7 @@
 package com.unihub.app.dto;
 
 import com.unihub.app.dto.EventSummaryDTO;
+import com.unihub.app.model.College;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -21,4 +22,5 @@ public class AppUserDTO {
     private String profilePicture;
     List<EventSummaryDTO> eventsCreated;
     List<EventSummaryDTO> eventsAttended;
+    private CollegeSummaryDTO college;
 }

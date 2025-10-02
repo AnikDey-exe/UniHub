@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.util.List;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -26,6 +27,10 @@ public class College {
     private String location;
 
     private String thumbnail;
+
+    @OneToMany(mappedBy = "college", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    List<AppUser> students;
 
     @Override
     public final boolean equals(Object o) {
