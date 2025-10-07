@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card"
+import { College } from "@/types/responses"
 
 const colleges = [
   { name: "Stanford University", students: "15,000+ students", logo: "SU" },
@@ -9,7 +10,7 @@ const colleges = [
   { name: "Princeton University", students: "8,000+ students", logo: "PU" },
 ]
 
-export function CollegesSection() {
+export function CollegesSection({ colleges }: { colleges: College[] }) {
   return (
     <section className="py-16 md:py-24 border-b border-border/40">
       <div className="container px-4 md:px-6">
@@ -29,10 +30,10 @@ export function CollegesSection() {
               className="p-4 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                <span className="text-lg font-bold text-primary">{college.logo}</span>
+                <span className="text-lg font-bold text-primary">{college.name.split(" ").map(word => word[0]).join("")}</span>
               </div>
               <h3 className="font-semibold text-sm mb-1">{college.name}</h3>
-              <p className="text-xs text-muted-foreground">{college.students}</p>
+              <p className="text-xs text-muted-foreground">{college.students?.length} students</p>
             </Card>
           ))}
         </div>

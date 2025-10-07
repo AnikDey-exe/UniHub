@@ -22,8 +22,13 @@ public class CollegeController {
     @Autowired
     private CollegeService collegeService;
 
+    @GetMapping("/")
+    public ResponseEntity<List<CollegeDTO>> getColleges() {
+        return ResponseEntity.ok().body(collegeService.getAllColleges());
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<CollegeDTO> saveEvent(@RequestBody College college) {
+    public ResponseEntity<CollegeDTO> saveCollege(@RequestBody College college) {
         return ResponseEntity.ok().body(collegeService.saveCollege(college));
     }
 }

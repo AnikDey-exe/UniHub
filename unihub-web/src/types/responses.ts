@@ -46,3 +46,11 @@ export interface EventSummary {
     location: string;
     capacity: number;
 }
+
+export interface College {
+    id: number;
+    name: string;
+    location: string;
+    thumbnail?: string;
+    students?: UserSummary[];
+}

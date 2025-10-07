@@ -25,6 +25,17 @@ public class CollegeService {
     @Autowired
     private DTOMapper dtoMapper;
 
+    public List<CollegeDTO> getAllColleges(){
+        List<College> colleges = collegeRepo.findAll();
+        List<CollegeDTO> collegeDTOs = new ArrayList<CollegeDTO>();
+
+        for (College college : colleges) {
+            collegeDTOs.add(dtoMapper.toCollegeDTO(college));
+        }
+
+        return collegeDTOs;
+    }
+
     public CollegeDTO saveCollege(College college) {
         College savedCollege = collegeRepo.save(college);
         CollegeDTO collegeDTO = dtoMapper.toCollegeDTO(savedCollege);

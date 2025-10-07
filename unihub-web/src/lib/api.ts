@@ -1,5 +1,5 @@
 import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest } from "@/types/requests";
-import { LoginResponse, User, Event } from "@/types/responses";
+import { LoginResponse, User, Event, College } from "@/types/responses";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
@@ -31,6 +31,10 @@ async function apiFetch<T>(
       window.location.href = '/login';
     }
     throw new Error('Invalid JWT token. May have expired. Please login again.');
+  }
+
+  if (response.status === 403) {
+    throw new Error('Forbidden. You are not authorized to access this resource.');
   }
 
   if (!response.ok) {
@@ -120,5 +124,13 @@ export const usersAPI = {
       body: JSON.stringify(userData),
     }),
 };
+
+export const collegesAPI = {
+  getAllColleges: () =>
+    apiFetch<College[]>(`/api/colleges/`, {
+      method: 'GET',
+    }),
+};
+
 
 export { apiFetch };
