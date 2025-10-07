@@ -26,7 +26,7 @@ export function CollegesSection() {
           {colleges.map((college) => (
             <Card
               key={college.name}
-              className="p-6 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow"
+              className="p-4 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow"
             >
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-lg font-bold text-primary">{college.logo}</span>

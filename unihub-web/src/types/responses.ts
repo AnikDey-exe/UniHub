@@ -1,0 +1,48 @@
+export interface LoginResponse {
+    token: string;
+    expiresIn: number;
+}
+  
+export interface User {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    phoneNumber: string;
+    about?: string;
+    profilePicture?: string;
+    eventsCreated?: EventSummary[];
+    eventsAttended?: EventSummary[];
+}
+
+export interface UserSummary {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    phoneNumber: string;
+    about?: string;
+    profilePicture?: string;
+}
+  
+export interface Event {
+    id: number;
+    name: string;
+    type: string;
+    description?: string;
+    location: string;
+    capacity: number;
+    creator?: UserSummary;
+    attendees?: UserSummary[];
+}
+
+export interface EventSummary {
+    id: number;
+    name: string;
+    type: string;
+    description?: string;
+    location: string;
+    capacity: number;
+}
