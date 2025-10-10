@@ -34,6 +34,10 @@ async function apiFetch<T>(
   }
 
   if (response.status === 403) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     throw new Error('Forbidden. You are not authorized to access this resource.');
   }
 
