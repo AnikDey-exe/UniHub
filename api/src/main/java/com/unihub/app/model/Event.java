@@ -41,6 +41,7 @@ public class Event {
     @ManyToMany
     @JoinTable(
             name = "attendee",
+            schema = "events",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
     )
