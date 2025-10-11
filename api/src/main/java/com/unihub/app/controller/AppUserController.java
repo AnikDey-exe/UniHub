@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class AppUserController {
     @Autowired
     private AppUserService appUserService;
@@ -52,5 +55,12 @@ public class AppUserController {
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
         return ResponseEntity.ok().body(loginResponse);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<AppUserDTO> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername(); // email from JWT
+
+        return ResponseEntity.ok(appUserService.me(email));
     }
 }

@@ -10,10 +10,9 @@ const getToken = (): string | null => {
 
 async function apiFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  token?: string
 ): Promise<T> {
-  const token = getToken();
-  
   const config: RequestInit = {
     ...options,
     headers: {
@@ -22,7 +21,7 @@ async function apiFetch<T>(
       ...options.headers,
     },
   };
-
+  // await new Promise(resolve => setTimeout(resolve, 3000));
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
   if (response.status === 401 && token) {
@@ -50,7 +49,8 @@ async function apiFetch<T>(
     return {} as T;
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 }
 
 export const authAPI = {
@@ -66,10 +66,10 @@ export const authAPI = {
       body: JSON.stringify(userData),
     }),
 
-  getCurrentUser: () =>
+  getCurrentUser: (token: string) =>
     apiFetch<User>('/api/users/me', {
       method: 'GET',
-    }),
+    }, token),
 };
 
 

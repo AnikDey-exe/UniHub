@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +10,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Calendar, Menu, User } from "lucide-react"
-import { APP_NAME } from "@/lib/constants"
+} from "@/components/ui/dropdown-menu";
+import { Calendar, Menu, User } from "lucide-react";
+import { APP_NAME } from "@/lib/constants";
+import { useCurrentUser } from "@/context/user-context";
 
 export function Header() {
-  // Simulating auth state - replace with actual auth logic
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, isLoading, isError } = useCurrentUser();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,25 +29,44 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/events" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/events"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             Browse Events
           </Link>
-          <Link href="/colleges" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/colleges"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             Colleges
           </Link>
-          <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/about"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             About
           </Link>
         </nav>
 
         <div className="flex items-center gap-3">
-          {!isLoggedIn ? (
+          {!user ? (
             <>
-              <Button variant="ghost" size="sm" onClick={() => setIsLoggedIn(true)}>
-                Log in
+              <Button variant="ghost" size="sm">
+                <Link
+                  href="/login"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Log in
+                </Link>
               </Button>
-              <Button size="sm" onClick={() => setIsLoggedIn(true)}>
-                Sign up
+              <Button size="sm">
+                <Link
+                  href="/signup"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Sign up
+                </Link>
               </Button>
             </>
           ) : (
@@ -77,17 +96,17 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  localStorage.removeItem('token');
+                  window.location.href = '/login';
+                }}>
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Menu</span>
-          </Button>
         </div>
       </div>
     </header>
-  )
+  );
 }

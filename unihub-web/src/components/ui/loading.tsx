@@ -75,7 +75,7 @@ export function Loading({
 }
 
 export function PageLoading({ text = 'Loading...' }: { text?: string }) {
-  const color = 'hsl(var(--primary))';
+  const color = typeof window !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() : '#1e49b7';
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -96,7 +96,7 @@ export function SectionLoading({
   text?: string;
   spinnerSize?: number;
 } & React.ComponentProps<'div'>) {
-    const color = typeof window !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() : '#1e49b7';
+  const color = typeof window !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() : '#1e49b7';
   
   return (
     <div 

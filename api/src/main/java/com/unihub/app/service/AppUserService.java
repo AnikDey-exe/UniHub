@@ -89,4 +89,9 @@ public class AppUserService {
         AppUser updatedUser = appUserRepo.save(user);
         return dtoMapper.toAppUserDTO(updatedUser);
     }
+
+    public AppUserDTO me(String email) {
+        AppUser user = appUserRepo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
+        return dtoMapper.toAppUserDTO(user);
+    }
 }

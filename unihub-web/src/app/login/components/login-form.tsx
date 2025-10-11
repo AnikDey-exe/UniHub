@@ -52,6 +52,7 @@ export function LoginForm() {
     e.preventDefault()
     
     if (validateForm()) {
+      console.log('formData', formData)
       loginMutation.mutate(formData)
     }
   }

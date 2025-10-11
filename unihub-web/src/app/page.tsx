@@ -7,7 +7,7 @@ import { eventsAPI, collegesAPI } from "@/lib/api"
 import { SectionLoading } from "@/components/ui/loading"
 
 async function EventsList() {
-  await new Promise(resolve => setTimeout(resolve, 3000));
+  // await new Promise(resolve => setTimeout(resolve, 3000));
   const events = await eventsAPI.getAllEvents();
   return <PopularEvents events={events} />;
 }
