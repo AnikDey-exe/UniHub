@@ -5,7 +5,7 @@ import { authAPI } from '@/lib/api';
 export function useUser(token: string | null) {
 
   return useQuery({
-    queryKey: ['user', token],
+    queryKey: ['user'],
     queryFn: () => {
         return authAPI.getCurrentUser(token || '');
     },

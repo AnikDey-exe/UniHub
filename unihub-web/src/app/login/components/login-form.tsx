@@ -1,14 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useLogin } from '@/hooks/use-login'
+import { useCurrentUser } from '@/context/user-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageLoading } from '@/components/ui/loading'
 import { LoginRequest } from '@/types/requests'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle } from 'lucide-react'
 
 export function LoginForm() {
   const [formData, setFormData] = useState<LoginRequest>({
@@ -17,8 +20,41 @@ export function LoginForm() {
   })
   const [errors, setErrors] = useState<Partial<LoginRequest>>({})
   const [showPassword, setShowPassword] = useState(false)
+  const { user, isLoading } = useCurrentUser()
+  const router = useRouter()
 
   const loginMutation = useLogin()
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/')
+    }
+  }, [user, isLoading, router])
+
+  if (isLoading) {
+    return <PageLoading />
+  }
+
+  if (user) {
+    return (
+      <Card className="bg-card border border-border shadow-lg w-full">
+        <CardContent className="px-8 py-16">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <CheckCircle className="h-16 w-16 text-green-500" />
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold">Already logged in!</h3>
+              <p className="text-muted-foreground">
+                You are already signed in as {user.firstName || user.email}
+              </p>
+            </div>
+            <Button onClick={() => router.push('/')} className="mt-4">
+              Go to Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
