@@ -2,8 +2,11 @@ package com.unihub.app.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
+import io.hypersistence.utils.hibernate.type.array.FloatArrayType;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,6 +36,18 @@ public class Event {
 
     @Column(nullable = false)
     private int capacity;
+
+    @Column(name = "event_start_date_utc", nullable = false)
+    private Instant eventStartDateUtc;
+
+    @Column(name = "event_end_date_utc", nullable = false)
+    private Instant eventEndDateUtc;
+
+    @Column(name = "event_timezone", nullable = false)
+    private String eventTimezone;
+
+    @Column(columnDefinition = "vector(1536)")
+    private float[] embedding;
 
     @ManyToOne
     @JoinColumn(name = "creator_user_id")

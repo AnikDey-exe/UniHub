@@ -1,0 +1,62 @@
+databaseChangeLog:
+- changeSet:
+    id: 1760301130966-5
+    author: anikdey (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: attendee
+        constraintName: FKl2eu2iphrl2diwvxw3hrnibyu
+- changeSet:
+    id: 1760301130966-6
+    author: anikdey (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: attendee
+        constraintName: FKtlojoyim69p3784m18rsocl33
+- changeSet:
+    id: 1760301130966-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: embedding
+            type: VARCHAR(255)
+        tableName: event
+- changeSet:
+    id: 1760301130966-2
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: event_end_date_utc
+            type: TIMESTAMP(6) WITH TIME ZONE
+        tableName: event
+- changeSet:
+    id: 1760301130966-3
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: event_start_date_utc
+            type: TIMESTAMP(6) WITH TIME ZONE
+        tableName: event
+- changeSet:
+    id: 1760301130966-4
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: event_timezone
+            type: VARCHAR(255)
+        tableName: event
+

@@ -11,3 +11,17 @@ export const queryClient = new QueryClient({
     },
   },
 })
+
+queryClient.getQueryCache().config.onError = (error: any) => {
+  if (error?.status === 401 || error?.response?.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/login'
+  }
+}
+
+queryClient.getMutationCache().config.onError = (error: any) => {
+  if (error?.status === 401 || error?.response?.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/login'
+  }
+}

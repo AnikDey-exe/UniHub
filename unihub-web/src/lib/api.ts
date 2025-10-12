@@ -21,23 +21,19 @@ async function apiFetch<T>(
       ...options.headers,
     },
   };
-  // await new Promise(resolve => setTimeout(resolve, 3000));
+  
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
   if (response.status === 401 && token) {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    throw new Error('Invalid JWT token. May have expired. Please login again.');
+    const error = new Error('Invalid JWT token. May have expired. Please login again.');
+    (error as any).status = 401;
+    throw error;
   }
 
   if (response.status === 403) {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-    throw new Error('Forbidden. You are not authorized to access this resource.');
+    const error = new Error('Forbidden. You are not authorized to access this resource.');
+    (error as any).status = 403;
+    throw error;
   }
 
   if (!response.ok) {

@@ -27,6 +27,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const { data: user, isLoading, isError } = useUser(token);
+
+  // if the error has status 401, remove token and redirect to login
+  // in any query is error status is 401, remove token and redirect to login
   
   if (!isMounted) return null;
   if (isLoading) return <PageLoading/>;

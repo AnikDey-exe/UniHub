@@ -11,6 +11,7 @@ import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
 import com.unihub.app.repository.AppUserRepo;
 import com.unihub.app.repository.EventRepo;
+import com.unihub.app.util.EmbeddingUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class EventService {
     private AppUserRepo appUserRepo;
     @Autowired
     private DTOMapper dtoMapper;
+    @Autowired
+    private OpenAIService openAIService;
 
     public List<EventDTO> getAllEvents(){
         List<Event> events = eventRepo.findAll();
@@ -71,6 +74,12 @@ public class EventService {
             event.setCreator(user);
             user.getEventsCreated().add(event);
         }
+        String textForEmbedding = event.getName();
+        if (event.getDescription() != null && !event.getDescription().isEmpty()) {
+            textForEmbedding += " " + event.getDescription();
+        }
+        float[] embedding = openAIService.generateEmbedding(textForEmbedding);
+        event.setEmbedding(embedding);
         Event savedEvent = eventRepo.save(event);
         EventDTO eventDTO = dtoMapper.toEventDTO(event);
         log.info("Event with id: {} saved successfully", event.getName());

@@ -1,0 +1,10 @@
+databaseChangeLog:
+- changeSet:
+    id: 1760304004630-1
+    author: anikdey (generated)
+    changes:
+    - modifyDataType:
+        columnName: embedding
+        newDataType: vector(1536)
+        tableName: event
+
