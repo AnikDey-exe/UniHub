@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_event_indexes_v2
+      author: anikdey
+      changes:
+        - createIndex:
+            indexName: idx_event_num_attendees
+            tableName: event
+            schemaName: events
+            columns:
+              - column:
+                  name: num_attendees
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE INDEX IF NOT EXISTS idx_event_embedding
+              ON events.event
+              USING ivfflat (embedding vector_cosine_ops)
+              WITH (lists = 100);

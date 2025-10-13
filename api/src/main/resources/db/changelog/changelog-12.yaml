@@ -1,0 +1,13 @@
+databaseChangeLog:
+- changeSet:
+    id: 1760307948042-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            defaultValueNumeric: 0
+            name: num_attendees
+            type: INTEGER
+        tableName: event
+

@@ -1,10 +1,13 @@
 package com.unihub.app.model;
 
+import com.unihub.app.util.FloatArrayConverter;
+import com.unihub.app.util.VectorConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 import io.hypersistence.utils.hibernate.type.array.FloatArrayType;
+
 
 import java.time.Instant;
 import java.util.Objects;
@@ -37,6 +40,9 @@ public class Event {
     @Column(nullable = false)
     private int capacity;
 
+    @Column(name = "num_attendees", columnDefinition = "integer default 0")
+    private int numAttendees;
+
     @Column(name = "event_start_date_utc", nullable = false)
     private Instant eventStartDateUtc;
 
@@ -47,6 +53,7 @@ public class Event {
     private String eventTimezone;
 
     @Column(columnDefinition = "vector(1536)")
+    @Convert(converter = VectorConverter.class)
     private float[] embedding;
 
     @ManyToOne

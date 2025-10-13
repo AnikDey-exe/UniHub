@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_event_indexes
+      author: anikdey
+      changes:
+        - createIndex:
+            indexName: idx_event_start_date
+            tableName: event
+            schemaName: events
+            columns:
+              - column:
+                  name: event_start_date_utc
+        - createIndex:
+            indexName: idx_event_end_date
+            tableName: event
+            schemaName: events
+            columns:
+              - column:
+                  name: event_end_date_utc
+        - createIndex:
+            indexName: idx_event_type
+            tableName: event
+            schemaName: events
+            columns:
+              - column:
+                  name: type

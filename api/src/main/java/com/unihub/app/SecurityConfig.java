@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
+                        .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/").permitAll()
                         .anyRequest()
                         .authenticated())

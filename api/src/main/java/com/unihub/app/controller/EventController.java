@@ -1,6 +1,7 @@
 package com.unihub.app.controller;
 
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.RsvpRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.model.Event;
@@ -22,6 +23,11 @@ public class EventController {
     @GetMapping("/")
     public ResponseEntity<List<EventDTO>> getEvents() {
         return ResponseEntity.ok().body(eventService.getAllEvents());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<EventDTO>> getSearchedEvents(@RequestBody EventSearchRequest searchBody) {
+        return ResponseEntity.ok().body(eventService.getEvents(searchBody));
     }
 
     @GetMapping("/{eventId}")
