@@ -17,5 +17,7 @@ public class EventSearchRequest {
     private Integer minAttendees;
     private String searchQuery;
     private String sortBy = "recency";
-    private int limit = 20;
+    private int limit = 3;
+    private Integer lastNumAttendees;
+    private Instant lastStartDate;
 }

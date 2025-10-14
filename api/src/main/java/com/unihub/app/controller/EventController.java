@@ -4,6 +4,7 @@ import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.RsvpRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.model.Event;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class EventController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<EventDTO>> getSearchedEvents(@RequestBody EventSearchRequest searchBody) {
+    public ResponseEntity<SearchedEventsResponse> getSearchedEvents(@RequestBody EventSearchRequest searchBody) {
         return ResponseEntity.ok().body(eventService.getEvents(searchBody));
     }
 

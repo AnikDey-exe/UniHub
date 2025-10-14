@@ -4,6 +4,7 @@ import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.CapacityLimitReachedException;
 import com.unihub.app.exception.EventNotFoundException;
 import com.unihub.app.exception.UserAlreadyRegisteredException;
@@ -51,7 +52,7 @@ public class EventService {
         return eventDTOs;
     }
 
-    public List<EventDTO> getEvents(EventSearchRequest request){
+    public SearchedEventsResponse getEvents(EventSearchRequest request){
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT *, ");
 
@@ -98,6 +99,12 @@ public class EventService {
         if (request.getMinAttendees() != null) {
             sql.append("AND e.num_attendees >= :minAttendees ");
         }
+        if (request.getLastNumAttendees() != null) {
+            sql.append("AND e.num_attendees < :lastNumAttendees ");
+        }
+        if (request.getLastStartDate() != null) {
+            sql.append("AND e.event_start_date_utc > :lastStartDate ");
+        }
 
         if (embedding != null) {
             float similarityThreshold = 0.8f;
@@ -115,8 +122,9 @@ public class EventService {
         if ("popularity".equals(request.getSortBy())) {
             sql.append("e.num_attendees DESC, ");
         } else {
-            sql.append("e.event_start_date_utc DESC, ");
+            sql.append("e.event_start_date_utc ASC, ");
         }
+
         if (embedding != null) {
             String embeddingLiteral = "[" + Arrays.stream(embeddingObj)
                     .map(f -> Float.toString(f))
@@ -140,6 +148,12 @@ public class EventService {
         if (request.getMinAttendees() != null) {
             query.setParameter("minAttendees", request.getMinAttendees());
         }
+        if (request.getLastNumAttendees() != null) {
+            query.setParameter("lastNumAttendees", request.getLastNumAttendees());
+        }
+        if (request.getLastStartDate() != null) {
+            query.setParameter("lastStartDate", request.getLastStartDate());
+        }
         query.setParameter("limit", request.getLimit());
 
         List<Event> events = query.getResultList();
@@ -150,7 +164,24 @@ public class EventService {
             eventDTOs.add(dtoMapper.toEventDTO(event));
         }
 
-        return eventDTOs;
+        SearchedEventsResponse response;
+        if (events.size() == request.getLimit()) {
+            response = new SearchedEventsResponse(
+                    eventDTOs,
+                    events.get(request.getLimit() - 1).getNumAttendees(),
+                    events.get(request.getLimit() - 1).getEventStartDateUtc(),
+                    true
+            );
+        } else {
+            response = new SearchedEventsResponse(
+                    eventDTOs,
+                    0,
+                    null,
+                    false
+            );
+        }
+
+        return response;
     }
 
     public EventDTO getEvent(Integer eventId) {
