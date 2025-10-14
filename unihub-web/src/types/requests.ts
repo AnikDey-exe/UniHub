@@ -22,6 +22,7 @@ export interface UserUpdateRequest {
     profilePicture?: string;
 }
 
+// have to add more to both of these
 export interface EventCreateRequest {
     name: string;
     type: string;
@@ -36,4 +37,16 @@ export interface EventUpdateRequest {
     description?: string;
     location?: string;
     capacity?: number;
+}
+
+export interface EventSearchRequest {
+    types?: string[];
+    startDate?: string;
+    endDate?: string;
+    minAttendees?: number;
+    searchQuery?: string;
+    sortBy?: string;
+    limit?: number;
+    lastNumAttendees?: number;
+    lastStartDate?: string;
 }

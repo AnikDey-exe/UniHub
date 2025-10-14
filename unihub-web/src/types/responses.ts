@@ -38,6 +38,13 @@ export interface Event {
     attendees?: UserSummary[];
 }
 
+export interface EventSearchResponse {
+    events: Event[];
+    lastNumAttendees: number;
+    lastStartDate: string;
+    hasMore: boolean;
+}
+
 export interface EventSummary {
     id: number;
     name: string;

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -27,8 +28,21 @@ public class EventController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<SearchedEventsResponse> getSearchedEvents(@RequestBody EventSearchRequest searchBody) {
-        return ResponseEntity.ok().body(eventService.getEvents(searchBody));
+    public ResponseEntity<SearchedEventsResponse> getSearchedEvents(
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) Instant startDate,
+            @RequestParam(required = false) Instant endDate,
+            @RequestParam(required = false) Integer minAttendees,
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false, defaultValue = "recency") String sortBy,
+            @RequestParam(required = false, defaultValue = "3") int limit,
+            @RequestParam(required = false) Integer lastNumAttendees,
+            @RequestParam(required = false) Instant lastStartDate) {
+        EventSearchRequest searchRequest = new EventSearchRequest(
+                types, startDate, endDate, minAttendees, searchQuery,
+                sortBy, limit, lastNumAttendees, lastStartDate
+        );
+        return ResponseEntity.ok().body(eventService.getEvents(searchRequest));
     }
 
     @GetMapping("/{eventId}")

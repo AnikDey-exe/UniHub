@@ -1,5 +1,5 @@
-import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest } from "@/types/requests";
-import { LoginResponse, User, Event, College } from "@/types/responses";
+import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest } from "@/types/requests";
+import { LoginResponse, User, Event, College, EventSearchResponse } from "@/types/responses";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
@@ -70,11 +70,7 @@ export const authAPI = {
 
 
 export const eventsAPI = {
-  getAllEvents: (filters?: {
-    search?: string;
-    type?: string;
-    sortBy?: string;
-  }) => {
+  getAllEvents: (filters: EventSearchRequest) => {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -85,8 +81,8 @@ export const eventsAPI = {
     }
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/api/events/?${queryString}` : '/api/events/';
-    return apiFetch<Event[]>(endpoint, { method: 'GET' });
+    const endpoint = queryString ? `/api/events/search?${queryString}` : '/api/events/search';
+    return apiFetch<EventSearchResponse>(endpoint, { method: 'GET' });
   },
 
   getEventById: (id: number) =>

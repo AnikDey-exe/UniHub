@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EventCard } from "@/components/ui/event-card"
 import { Calendar, Search, Filter, Grid, List } from "lucide-react"
 import { Event } from "@/types/responses"
+import { DateTimePicker } from '@mantine/dates'
+import { useState } from 'react'
+import '@mantine/core/styles.css'
+import '@mantine/dates/styles.css'
 
 interface EventsClientProps {
   events: Event[]
@@ -16,25 +20,28 @@ export function EventsClient({ events }: EventsClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedType, setSelectedType] = useState('all')
   const [sortBy, setSortBy] = useState('date')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
 
-  // Get unique event types
   const eventTypes = useMemo(() => {
     const types = [...new Set(events.map(event => event.type))]
     return ['all', ...types]
   }, [events])
 
-  // Filter and sort events
   const filteredEvents = useMemo(() => {
     let filtered = events.filter(event => {
       const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           event.description?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = selectedType === 'all' || event.type === selectedType
-      return matchesSearch && matchesType
+      
+     
+      let matchesDateRange = true
+      
+      return matchesSearch && matchesType && matchesDateRange
     })
 
-    // Sort events
+
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -51,7 +58,7 @@ export function EventsClient({ events }: EventsClientProps) {
     })
 
     return filtered
-  }, [events, searchQuery, selectedType, sortBy])
+  }, [events, searchQuery, selectedType, sortBy, startDate, endDate])
 
   return (
     <div className="min-h-screen">
@@ -93,14 +100,42 @@ export function EventsClient({ events }: EventsClientProps) {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-700">Attending</label>
               <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Start date"
-                  className="w-32 bg-gray-50 border-gray-200"
+                <DateTimePicker
+                  placeholder="Start date & time"
+                  value={startDate}
+                  onChange={(value) => setStartDate(value ? new Date(value) : null)}
+                  clearable
+                  size="sm"
+                  valueFormat="MM/DD/YY HH:mm"
+                  styles={{
+                    input: {
+                      width: '160px',
+                      backgroundColor: '#f9fafb',
+                      borderColor: '#e5e7eb',
+                      fontSize: '13px',
+                      height: '36px',
+                      paddingRight: '32px',
+                    }
+                  }}
                 />
                 <span className="text-sm text-gray-500">to</span>
-                <Input
-                  placeholder="End date"
-                  className="w-32 bg-gray-50 border-gray-200"
+                <DateTimePicker
+                  placeholder="End date & time"
+                  value={endDate}
+                  onChange={(value) => setEndDate(value ? new Date(value) : null)}
+                  clearable
+                  size="sm"
+                  valueFormat="MM/DD/YY HH:mm"
+                  styles={{
+                    input: {
+                      width: '160px',
+                      backgroundColor: '#f9fafb',
+                      borderColor: '#e5e7eb',
+                      fontSize: '13px',
+                      height: '36px',
+                      paddingRight: '32px',
+                    }
+                  }}
                 />
               </div>
             </div>
