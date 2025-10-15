@@ -42,7 +42,7 @@ export interface EventSearchResponse {
     events: Event[];
     lastNumAttendees: number;
     lastStartDate: string;
-    hasMore: boolean;
+    hasNext: boolean;
 }
 
 export interface EventSummary {

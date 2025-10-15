@@ -6,7 +6,7 @@ import { SectionLoading } from "@/components/ui/loading"
 
 async function EventsList() {
   const events = await eventsAPI.getAllEvents({})
-  return <EventsClient events={events.events} />
+  return <EventsClient initialEvents={events.events} />
 }
 
 export default function EventsPage() {

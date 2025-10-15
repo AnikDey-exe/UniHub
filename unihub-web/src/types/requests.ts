@@ -39,8 +39,10 @@ export interface EventUpdateRequest {
     capacity?: number;
 }
 
+import { EventType } from './event-types';
+
 export interface EventSearchRequest {
-    types?: string[];
+    types?: EventType[];
     startDate?: string;
     endDate?: string;
     minAttendees?: number;

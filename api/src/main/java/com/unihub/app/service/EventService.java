@@ -175,7 +175,7 @@ public class EventService {
         } else {
             response = new SearchedEventsResponse(
                     eventDTOs,
-                    0,
+                    -1,
                     null,
                     false
             );
