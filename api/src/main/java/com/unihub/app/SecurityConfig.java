@@ -2,6 +2,7 @@ package com.unihub.app;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
                         .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/").permitAll()
                         .anyRequest()

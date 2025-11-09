@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { EventCard } from "@/components/ui/event-card"
 import { Event } from "@/types/responses"
+import Link from "next/link"
 
 export function PopularEvents({ events }: { events: Event[] }) {
   return (
@@ -20,9 +21,11 @@ export function PopularEvents({ events }: { events: Event[] }) {
         </div>
 
         <div className="text-center mt-12">
-          <Button size="lg" variant="outline">
-            View All Events
-          </Button>
+          <Link href="/events">
+            <Button size="lg" variant="outline">
+              View All Events
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
