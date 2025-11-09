@@ -33,7 +33,8 @@ export function useEventsSearch({
     queryKey: ['events-search', searchParams],
     queryFn: () => eventsAPI.getAllEvents(searchParams),
     enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: true,
     refetchOnWindowFocus: false
   })
 }
@@ -62,28 +63,34 @@ export function useEventsInfiniteSearch({
         ...searchParams
       }
       
-      // Only add pagination params if they exist
-      if (pageParam && (pageParam as any).lastStartDate) {
-        params.lastStartDate = (pageParam as any).lastStartDate
-      }
-      if (pageParam && (pageParam as any).lastNumAttendees) {
-        params.lastNumAttendees = (pageParam as any).lastNumAttendees
+      if (pageParam) {
+        if (sortBy === 'date' && (pageParam as any).lastStartDate) {
+          params.lastStartDate = (pageParam as any).lastStartDate
+        } else if (sortBy !== 'date' && (pageParam as any).lastNumAttendees) {
+          params.lastNumAttendees = (pageParam as any).lastNumAttendees
+        }
       }
       
       return eventsAPI.getAllEvents(params)
     },
     getNextPageParam: (lastPage: any) => {
       if (lastPage.hasNext) {
-        return {
-          lastStartDate: lastPage.lastStartDate,
-          lastNumAttendees: lastPage.lastNumAttendees
+        if (sortBy === 'date') {
+          return {
+            lastStartDate: lastPage.lastStartDate
+          }
+        } else {
+          return {
+            lastNumAttendees: lastPage.lastNumAttendees
+          }
         }
       }
       return undefined
     },
     initialPageParam: undefined,
     enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: true,
     refetchOnWindowFocus: false
   })
 }

@@ -1,3 +1,5 @@
+import { EventType } from './event-types';
+
 export interface LoginRequest {
     email: string;
     password: string;
@@ -39,8 +41,6 @@ export interface EventUpdateRequest {
     capacity?: number;
 }
 
-import { EventType } from './event-types';
-
 export interface EventSearchRequest {
     types?: EventType[];
     startDate?: string;
@@ -51,4 +51,9 @@ export interface EventSearchRequest {
     limit?: number;
     lastNumAttendees?: number;
     lastStartDate?: string;
+}
+
+export interface RSVPRequest {
+    eventId: number;
+    userEmail: string;
 }

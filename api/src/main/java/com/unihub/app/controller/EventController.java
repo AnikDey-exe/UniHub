@@ -57,8 +57,8 @@ public class EventController {
     }
 
     @PostMapping("/rsvp")
-    public ResponseEntity<String> rsvpEvent(@RequestBody RsvpRequest rsvpBody) {
+    public ResponseEntity<Void> rsvpEvent(@RequestBody RsvpRequest rsvpBody) {
         eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail());
-        return ResponseEntity.ok().body(rsvpBody.getUserEmail()+" has successfully rsvp'd to event with id: "+rsvpBody.getEventId().toString());
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,20 +1,62 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Users } from "lucide-react"
 import { Event } from "@/types/responses"
 import { formatAttendees } from "@/utils/formatAttendees"
+import { useCurrentUser } from "@/context/user-context"
+import { useRSVP } from "@/hooks/use-rsvp"
+import { useEvent } from "@/hooks/use-event"
 
 interface EventDetailsClientProps {
   event: Event
 }
 
 export function EventDetailsClient({ event }: EventDetailsClientProps) {
-  const attendeesCount = event.attendees?.length || 0
-  const university = event.creator 
-    ? `${event.creator.firstName} ${event.creator.lastName}` 
+  const router = useRouter()
+  const { user } = useCurrentUser()
+  const { data: eventData } = useEvent(event.id, event)
+  const rsvpMutation = useRSVP(event.id)
+
+  const attendeesCount = eventData?.attendees?.length || 0
+  const university = eventData?.creator 
+    ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
     : 'University'
+
+  const isRegistered = user && eventData?.attendees?.some(
+    attendee => attendee.email === user.email
+  )
+
+  const handleRSVP = () => {
+    if (rsvpMutation.isPending) {
+      return
+    }
+  
+    if (!user) {
+      router.push('/login')
+      return
+    }
+  
+    if (isRegistered) {
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/login')
+      return
+    }
+
+    rsvpMutation.mutate({
+      rsvpData: {
+        eventId: event.id,
+        userEmail: user.email,
+      },
+      token,
+    })
+  }
   
   return (
     <div className="min-h-screen bg-background">
@@ -28,17 +70,17 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
 
           <div className="flex flex-col justify-center space-y-6">
             <div className="space-y-2">
-              <h1 className="text-3xl md:text-4xl font-bold">{event.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold">{eventData?.name}</h1>
               <p className="text-base md:text-lg text-foreground">{university}</p>
               <Badge variant="outline" className="w-fit mt-1">
-                {event.type}
+                {eventData?.type}
               </Badge>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-foreground">
                 <MapPin className="h-5 w-5 flex-shrink-0" />
-                <span className="text-base">{event.location}</span>
+                <span className="text-base">{eventData?.location}</span>
               </div>
               
               <div className="flex items-center gap-3 text-foreground">
@@ -47,8 +89,17 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
               </div>
             </div>
 
-            <Button size="lg" className="w-full md:w-auto rounded-md">
-              Register
+            <Button 
+              size="lg" 
+              className="w-full md:w-auto rounded-md"
+              onClick={handleRSVP}
+              disabled={isRegistered || rsvpMutation.isPending}
+            >
+              {rsvpMutation.isPending 
+                ? 'Registering...' 
+                : isRegistered 
+                  ? 'Registered' 
+                  : 'Register'}
             </Button>
           </div>
         </div>
@@ -56,7 +107,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
         <div className="mb-12">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Description</h2>
           <p className="text-foreground leading-relaxed text-base">
-            {event.description || "No description available for this event."}
+            {eventData?.description || "No description available for this event."}
           </p>
         </div>
 

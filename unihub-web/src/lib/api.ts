@@ -1,4 +1,4 @@
-import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest } from "@/types/requests";
+import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest } from "@/types/requests";
 import { LoginResponse, User, Event, College, EventSearchResponse } from "@/types/responses";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
@@ -106,6 +106,12 @@ export const eventsAPI = {
     apiFetch<void>(`/api/events/${id}`, {
       method: 'DELETE',
     }),
+
+  rsvp: (rsvpData: RSVPRequest, token: string) =>
+    apiFetch<void>('/api/events/rsvp', {
+      method: 'POST',
+      body: JSON.stringify(rsvpData),
+    }, token),
 };
 
 export const usersAPI = {
