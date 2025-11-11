@@ -1,8 +1,11 @@
 package com.unihub.app.dto;
 
+import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -15,4 +18,7 @@ public class EventSummaryDTO {
     private String location;
     private int capacity;
     private int numAttendees;
+    private Instant eventStartDateUtc;
+    private Instant eventEndDateUtc;
+    private String eventTimezone;
 }

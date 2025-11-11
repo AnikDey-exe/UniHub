@@ -35,6 +35,9 @@ export interface Event {
     location: string;
     capacity: number;
     numAttendees: number;
+    eventStartDateUtc: string;
+    eventEndDateUtc: string;
+    eventTimezone: string;
     creator?: UserSummary;
     attendees?: UserSummary[];
 }
@@ -54,6 +57,9 @@ export interface EventSummary {
     location: string;
     capacity: number;
     numAttendees: number;
+    eventStartDateUtc: string;
+    eventEndDateUtc: string;
+    eventTimezone: string;
 }
 
 export interface College {

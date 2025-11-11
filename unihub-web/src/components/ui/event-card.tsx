@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, MapPin, Users } from "lucide-react"
 import { Event } from "@/types/responses"
 import { cn } from "@/utils/cn"
+import { formatEventDate } from "@/utils/formatEventDate"
 import Link from "next/link"
 
 interface EventCardProps {
@@ -119,10 +120,8 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
 
           <CardContent className="space-y-2 pb-3 px-0">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              {/* <span>
-                {event.date} at {event.time}
-              </span> */}
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span>{formatEventDate(event.eventStartDateUtc, event.eventEndDateUtc, event.eventTimezone)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />

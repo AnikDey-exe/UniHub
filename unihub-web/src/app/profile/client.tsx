@@ -2,17 +2,22 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Settings } from "lucide-react"
+import { Settings, List, Calendar as CalendarIcon } from "lucide-react"
 import { useCurrentUser } from "@/context/user-context"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EventCard } from "@/components/ui/event-card"
+import { EventsCalendar } from "@/components/ui/events-calendar"
+import { Button } from "@/components/ui/button"
 import { EventSummary, Event } from "@/types/responses"
 import { PageLoading } from "@/components/ui/loading"
+import '@mantine/core/styles.css'
+import '@mantine/dates/styles.css'
 
 export function ProfileClient() {
   const { user, isLoading } = useCurrentUser()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("registered")
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -103,13 +108,40 @@ export function ProfileClient() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="registered" className="mt-8">
+          <div className="flex items-center justify-between mt-6 mb-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="flex items-center gap-2"
+              >
+                <List className="h-4 w-4" />
+                List View
+              </Button>
+              <Button
+                variant={viewMode === "calendar" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("calendar")}
+                className="flex items-center gap-2"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                Calendar View
+              </Button>
+            </div>
+          </div>
+
+          <TabsContent value="registered" className="mt-4">
             {eventsAttended.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {eventsAttended.map((eventSummary: EventSummary) => (
-                  <EventCard key={eventSummary.id} event={convertEventSummaryToEvent(eventSummary)} variant="default" />
-                ))}
-              </div>
+              viewMode === "list" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {eventsAttended.map((eventSummary: EventSummary) => (
+                    <EventCard key={eventSummary.id} event={convertEventSummaryToEvent(eventSummary)} variant="default" />
+                  ))}
+                </div>
+              ) : (
+                <EventsCalendar events={eventsAttended} />
+              )
             ) : (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">No registered events yet.</p>
@@ -117,13 +149,17 @@ export function ProfileClient() {
             )}
           </TabsContent>
 
-          <TabsContent value="hosted" className="mt-8">
+          <TabsContent value="hosted" className="mt-4">
             {eventsCreated.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {eventsCreated.map((eventSummary: EventSummary) => (
-                  <EventCard key={eventSummary.id} event={convertEventSummaryToEvent(eventSummary)} variant="default" />
-                ))}
-              </div>
+              viewMode === "list" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {eventsCreated.map((eventSummary: EventSummary) => (
+                    <EventCard key={eventSummary.id} event={convertEventSummaryToEvent(eventSummary)} variant="default" />
+                  ))}
+                </div>
+              ) : (
+                <EventsCalendar events={eventsCreated} />
+              )
             ) : (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">No hosted events yet.</p>

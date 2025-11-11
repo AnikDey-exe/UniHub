@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.Set;
 
 @Data
@@ -17,6 +18,9 @@ public class EventDTO {
     private String location;
     private int capacity;
     private int numAttendees;
+    private Instant eventStartDateUtc;
+    private Instant eventEndDateUtc;
+    private String eventTimezone;
     private AppUserSummaryDTO creator;
     private Set<AppUserSummaryDTO> attendees;
 }
