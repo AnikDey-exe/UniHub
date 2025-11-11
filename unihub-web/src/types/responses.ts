@@ -34,6 +34,7 @@ export interface Event {
     description?: string;
     location: string;
     capacity: number;
+    numAttendees: number;
     creator?: UserSummary;
     attendees?: UserSummary[];
 }
@@ -52,6 +53,7 @@ export interface EventSummary {
     description?: string;
     location: string;
     capacity: number;
+    numAttendees: number;
 }
 
 export interface College {

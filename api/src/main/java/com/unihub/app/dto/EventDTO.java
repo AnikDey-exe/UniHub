@@ -16,6 +16,7 @@ public class EventDTO {
     private String description;
     private String location;
     private int capacity;
+    private int numAttendees;
     private AppUserSummaryDTO creator;
     private Set<AppUserSummaryDTO> attendees;
 }

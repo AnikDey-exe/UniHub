@@ -14,4 +14,5 @@ public class EventSummaryDTO {
     private String description;
     private String location;
     private int capacity;
+    private int numAttendees;
 }

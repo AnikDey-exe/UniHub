@@ -12,6 +12,7 @@ export function useRSVP(eventId: number) {
     mutationFn: ({ rsvpData, token }) => eventsAPI.rsvp(rsvpData, token),
     onSuccess: async () => {
       queryClient.refetchQueries({ queryKey: ['event', eventId] })
+      queryClient.invalidateQueries({ queryKey: ['user'] })
 
       queryClient.invalidateQueries({ queryKey: ['events-search'] })
       queryClient.invalidateQueries({ queryKey: ['events-infinite-search'] })

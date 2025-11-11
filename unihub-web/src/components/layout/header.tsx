@@ -89,8 +89,8 @@ export function Header() {
                   <DropdownMenuLabel>{user.firstName} {user.lastName}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link href="/dashboard" className="w-full">
-                      Dashboard
+                    <Link href="/profile" className="w-full">
+                      Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
@@ -160,8 +160,8 @@ export function Header() {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Link href="/dashboard" className="w-full">
-                        Dashboard
+                      <Link href="/profile" className="w-full">
+                        Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>

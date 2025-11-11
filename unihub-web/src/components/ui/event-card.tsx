@@ -84,7 +84,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Users className="h-3 w-3 flex-shrink-0" />
-                  <span>{event.attendees?.length || 0} attending</span>
+                  <span>{event.numAttendees || 0} attending</span>
                 </div>
               </div>
 
@@ -130,7 +130,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span>{event.attendees?.length || 0} attending</span>
+              <span>{event.numAttendees|| 0} attending</span>
             </div>
           </CardContent>
 
