@@ -3,11 +3,6 @@ import { LoginResponse, User, Event, College, EventSearchResponse } from "@/type
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
-const getToken = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
-};
-
 async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -115,16 +110,16 @@ export const eventsAPI = {
 };
 
 export const usersAPI = {
-  getUserProfile: (id: number) =>
+  getUserProfile: (id: number, token: string) =>
     apiFetch<User>(`/api/users/${id}`, {
       method: 'GET',
-    }),
+    }, token),
 
-  updateUserProfile: (id: number, userData: UserUpdateRequest) =>
+  updateUserProfile: (id: number, userData: UserUpdateRequest, token: string) =>
     apiFetch<User>(`/api/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(userData),
-    }),
+    }, token),
 };
 
 export const collegesAPI = {
