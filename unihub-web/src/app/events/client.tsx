@@ -57,18 +57,18 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
   const eventTypeOptions = EVENT_TYPE_OPTIONS
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <section>
         <div className="container px-4 md:px-6 py-4 mt-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+            <h1 className="text-3xl font-bold text-foreground">Events</h1>
             <div className="relative w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search events..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10 bg-gray-50 border-gray-200"
+                className="pl-10"
               />
             </div>
           </div>
@@ -79,7 +79,7 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
         <div className="container px-4 md:px-6 py-2">
           <div className="flex flex-wrap gap-8 items-start">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">Sort by</label>
+              <label className="text-sm font-medium text-foreground">Sort by</label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Recent" />
@@ -95,7 +95,7 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">Attending</label>
+              <label className="text-sm font-medium text-foreground">Attending</label>
               <div className="flex items-center gap-2">
                 <DateTimePicker
                   placeholder="Start date & time"
@@ -104,18 +104,8 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
                   clearable
                   size="sm"
                   valueFormat="MM/DD/YY HH:mm"
-                  styles={{
-                    input: {
-                      width: '160px',
-                      backgroundColor: '#f9fafb',
-                      borderColor: '#e5e7eb',
-                      fontSize: '13px',
-                      height: '36px',
-                      paddingRight: '32px',
-                    }
-                  }}
                 />
-                <span className="text-sm text-gray-500">to</span>
+                <span className="text-sm text-muted-foreground">to</span>
                 <DateTimePicker
                   placeholder="End date & time"
                   value={endDate}
@@ -123,33 +113,23 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
                   clearable
                   size="sm"
                   valueFormat="MM/DD/YY HH:mm"
-                  styles={{
-                    input: {
-                      width: '160px',
-                      backgroundColor: '#f9fafb',
-                      borderColor: '#e5e7eb',
-                      fontSize: '13px',
-                      height: '36px',
-                      paddingRight: '32px',
-                    }
-                  }}
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">Within</label>
+              <label className="text-sm font-medium text-foreground">Within</label>
               <div className="flex items-center gap-2">
                 <Input
                   placeholder="10"
-                  className="w-20 bg-gray-50 border-gray-200"
+                  className="w-20"
                 />
-                <span className="text-sm text-gray-500">miles</span>
+                <span className="text-sm text-muted-foreground">miles</span>
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">Type</label>
+              <label className="text-sm font-medium text-foreground">Type</label>
               <MultiSelect<EventType>
                 options={eventTypeOptions}
                 selected={selectedTypes}
@@ -166,15 +146,15 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
         <div className="container px-4 md:px-6">
           {isLoading ? (
             <div className="text-center py-16">
-              <div className="text-gray-500">
+              <div className="text-muted-foreground">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-                <h3 className="text-xl font-semibold mb-2">Searching events...</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Searching events...</h3>
                 <p className="text-sm">Please wait while we find the best events for you.</p>
               </div>
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <div className="text-red-500">
+              <div className="text-destructive">
                 <Calendar className="h-16 w-16 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Search failed</h3>
                 <p className="text-sm">There was an error searching for events. Please try again.</p>
@@ -200,9 +180,9 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
 
               {filteredEvents.length === 0 && (
                 <div className="text-center py-16">
-                  <div className="text-gray-500">
+                  <div className="text-muted-foreground">
                     <Calendar className="h-16 w-16 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No events found</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">No events found</h3>
                     <p className="text-sm">Try adjusting your search or filters to find more events.</p>
                   </div>
                 </div>

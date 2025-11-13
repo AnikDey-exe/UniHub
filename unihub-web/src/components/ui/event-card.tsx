@@ -17,8 +17,8 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
   if (variant === 'figma') {
     return (
       <Link href={`/events/${event.id}`}>
-        <Card className={cn("bg-white shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow", className)}>
-          <div className="h-48 w-full bg-gray-200">
+        <Card className={cn("overflow-hidden cursor-pointer hover:shadow-md transition-shadow", className)}>
+          <div className="h-48 w-full bg-muted">
             <img 
               src="/placeholder.svg" 
               alt={event.name} 
@@ -28,22 +28,22 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
           
           <div className="p-4 space-y-3">
             <div>
-              <h3 className="font-bold text-gray-900 text-lg">{event.name}</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="font-bold text-foreground text-lg">{event.name}</h3>
+              <p className="text-muted-foreground text-sm">
                 {event.creator ? `${event.creator.firstName} ${event.creator.lastName}` : 'UC Berkeley'}
               </p>
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-gray-700">
+              <div className="flex items-center gap-2 text-foreground">
                 <Calendar className="h-4 w-4" />
                 <span className="text-sm">Feb 19, 2026 at 7:30pm</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-700">
+              <div className="flex items-center gap-2 text-foreground">
                 <MapPin className="h-4 w-4" />
                 <span className="text-sm">Berkeley, CA Computing Building</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-700">
+              <div className="flex items-center gap-2 text-foreground">
                 <Users className="h-4 w-4" />
                 <span className="text-sm">8030 attending</span>
               </div>

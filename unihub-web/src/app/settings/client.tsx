@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { User, Moon, Eye, LogOut } from "lucide-react"
 import { useCurrentUser } from "@/context/user-context"
+import { useTheme } from "@/context/theme-context"
 import { useUpdateUser } from "@/hooks/use-update-user"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,9 +20,9 @@ type SettingsSection = "profile" | "theme" | "visibility"
 
 export default function SettingsClient() {
   const { user, isLoading } = useCurrentUser()
+  const { theme, setTheme, isDark } = useTheme()
   const router = useRouter()
   const [activeSection, setActiveSection] = useState<SettingsSection>("profile")
-  const [isDarkMode, setIsDarkMode] = useState(false)
   const [visibility, setVisibility] = useState("public")
   
   const [formData, setFormData] = useState<UserUpdateRequest>({
@@ -236,8 +237,8 @@ export default function SettingsClient() {
                     </div>
                     <Switch
                       id="dark-mode"
-                      checked={isDarkMode}
-                      onCheckedChange={setIsDarkMode}
+                      checked={isDark}
+                      onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                     />
                   </div>
                 </div>
