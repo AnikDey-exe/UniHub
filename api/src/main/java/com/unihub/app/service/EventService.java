@@ -1,6 +1,7 @@
 package com.unihub.app.service;
 
 import com.unihub.app.dto.DTOMapper;
+import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
@@ -35,6 +36,8 @@ public class EventService {
     private DTOMapper dtoMapper;
     @Autowired
     private OpenAIService openAIService;
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private EntityManager em;
 
@@ -311,6 +314,9 @@ public class EventService {
         event.setNumAttendees(event.getNumAttendees() + 1);
         event.getAttendees().add(attendee);
         attendee.getEventsAttended().add(event);
+
+        EmailDTO email = new EmailDTO(userEmail, "You have been registered for "+event.getName()+"!", "Registration Confirmation");
+        emailService.sendSimpleEmailAsync(email);
     }
 
     @Transactional
