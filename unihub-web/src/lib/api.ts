@@ -85,11 +85,11 @@ export const eventsAPI = {
       method: 'GET',
     }),
 
-  createEvent: (eventData: EventCreateRequest) =>
+  createEvent: (eventData: EventCreateRequest, token: string) =>
     apiFetch<Event>('/api/events/create', {
       method: 'POST',
       body: JSON.stringify(eventData),
-    }),
+    }, token),
 
   updateEvent: (id: number, eventData: EventUpdateRequest) =>
     apiFetch<Event>(`/api/events/${id}`, {

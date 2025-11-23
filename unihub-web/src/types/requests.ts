@@ -31,6 +31,9 @@ export interface EventCreateRequest {
     description?: string;
     location: string;
     capacity: number;
+    eventStartDateUtc: string;
+    eventEndDateUtc: string;
+    eventTimezone: string;
 }
 
 export interface EventUpdateRequest {
