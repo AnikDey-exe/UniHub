@@ -38,7 +38,7 @@ export function CreateEventClient() {
   const router = useRouter()
   const createEventMutation = useCreateEvent()
 
-  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc'> & {
+  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creator'> & {
     startDate: Date | null
     endDate: Date | null
   }>({
@@ -142,6 +142,9 @@ export function CreateEventClient() {
       eventTimezone: formData.eventTimezone,
       eventStartDateUtc: dayjs(formData.startDate).utc().toISOString(),
       eventEndDateUtc: dayjs(formData.endDate).utc().toISOString(),
+      creator: {
+        id: user.id,
+      }
     }
 
     try {

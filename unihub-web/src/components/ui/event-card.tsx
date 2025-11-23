@@ -101,16 +101,16 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
 
   // Default variant (from popular-events.tsx)
   return (
-    <Link href={`/events/${event.id}`}>
-      <Card className={cn("overflow-hidden hover:shadow-lg transition-shadow p-0 cursor-pointer", className)}>
-        <div className="relative h-48 w-full overflow-hidden bg-muted">
+    <Link href={`/events/${event.id}`} className="h-full">
+      <Card className={cn("overflow-hidden hover:shadow-lg transition-shadow p-0 cursor-pointer h-full flex flex-col", className)}>
+        <div className="relative h-48 w-full overflow-hidden bg-muted flex-shrink-0">
           <img src="/placeholder.svg" alt={event.name} className="h-full w-full object-cover" />
           <Badge className="absolute top-3 right-3 bg-background/90 text-foreground hover:bg-background">
             {event.type}
           </Badge>
         </div>
 
-        <div className="pb-6 pr-6 pl-6">
+        <div className="pb-6 pr-6 pl-6 flex flex-col flex-grow">
           <CardHeader className="pb-3 px-0">
             <h3 className="font-semibold text-lg line-clamp-1">{event.name}</h3>
             <p className="text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
             </p>
           </CardHeader>
 
-          <CardContent className="space-y-2 pb-3 px-0">
+          <CardContent className="space-y-2 pb-3 px-0 flex-grow">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4 flex-shrink-0" />
               <span>{formatEventDate(event.eventStartDateUtc, event.eventEndDateUtc, event.eventTimezone)}</span>
@@ -133,7 +133,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
             </div>
           </CardContent>
 
-          <CardFooter className="px-0 pt-0">
+          <CardFooter className="px-0 pt-0 mt-auto">
             <Button className="w-full bg-transparent" variant="outline">
               View Details
             </Button>

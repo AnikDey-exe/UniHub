@@ -17,9 +17,9 @@ export function formatEventDate(
     const isSameDay = start.format('YYYY-MM-DD') === end.format('YYYY-MM-DD')
 
     if (isSameDay) {
-      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm')} - ${end.format('h:mm')} ${eventTimezone}`
+      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm A')} - ${end.format('h:mm A')} ${eventTimezone}`
     } else {
-      return `${start.format('MMM D, YYYY at h:mm')} - ${end.format('MMM D, YYYY at h:mm')} ${eventTimezone}`
+      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm A')} - ${end.format('MMM D, YYYY')} at ${end.format('h:mm A')} ${eventTimezone}`
     }
   } catch (error) {
     const start = dayjs(startDateUtc)
@@ -27,9 +27,9 @@ export function formatEventDate(
     const isSameDay = start.format('YYYY-MM-DD') === end.format('YYYY-MM-DD')
 
     if (isSameDay) {
-      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm')} - ${end.format('h:mm')}`
+      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm A')} - ${end.format('h:mm A')}`
     } else {
-      return `${start.format('MMM D, YYYY at h:mm')} - ${end.format('MMM D, YYYY at h:mm')}`
+      return `${start.format('MMM D, YYYY')} at ${start.format('h:mm A')} - ${end.format('MMM D, YYYY')} at ${end.format('h:mm A')}`
     }
   }
 }

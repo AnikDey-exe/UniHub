@@ -34,6 +34,9 @@ export interface EventCreateRequest {
     eventStartDateUtc: string;
     eventEndDateUtc: string;
     eventTimezone: string;
+    creator: {
+        id: number;
+    }
 }
 
 export interface EventUpdateRequest {
