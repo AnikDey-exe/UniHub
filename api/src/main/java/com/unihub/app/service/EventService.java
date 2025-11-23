@@ -5,10 +5,7 @@ import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.dto.response.SearchedEventsResponse;
-import com.unihub.app.exception.CapacityLimitReachedException;
-import com.unihub.app.exception.EventNotFoundException;
-import com.unihub.app.exception.UserAlreadyRegisteredException;
-import com.unihub.app.exception.UserNotFoundException;
+import com.unihub.app.exception.*;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
 import com.unihub.app.repository.AppUserRepo;
@@ -314,5 +311,39 @@ public class EventService {
         event.setNumAttendees(event.getNumAttendees() + 1);
         event.getAttendees().add(attendee);
         attendee.getEventsAttended().add(event);
+    }
+
+    @Transactional
+    public void unrsvpEvent(Integer eventId, String userEmail) {
+        Event event = eventRepo.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException("Event not found"));
+        AppUser attendee = appUserRepo.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!event.getAttendees().contains(attendee)) {
+            throw new UserNotRegisteredException("User is not registered for event.");
+        }
+
+        em.detach(event);
+
+        em.createNativeQuery("""
+            DELETE FROM events.attendee
+            WHERE event_id = :eventId AND attendee_user_id = :userId
+        """)
+                .setParameter("eventId", eventId)
+                .setParameter("userId", attendee.getId())
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            UPDATE events.event
+            SET num_attendees = num_attendees - 1
+            WHERE id = :eventId
+        """)
+                .setParameter("eventId", eventId)
+                .executeUpdate();
+
+        event.setNumAttendees(event.getNumAttendees() - 1);
+        event.getAttendees().remove(attendee);
+        attendee.getEventsAttended().remove(event);
     }
 }

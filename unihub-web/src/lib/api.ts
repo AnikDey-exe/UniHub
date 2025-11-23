@@ -107,6 +107,12 @@ export const eventsAPI = {
       method: 'POST',
       body: JSON.stringify(rsvpData),
     }, token),
+  
+  unrsvp: (rsvpData: RSVPRequest, token: string) =>
+    apiFetch<void>('/api/events/unrsvp', {
+      method: 'POST',
+      body: JSON.stringify(rsvpData),
+    }, token),
 };
 
 export const usersAPI = {

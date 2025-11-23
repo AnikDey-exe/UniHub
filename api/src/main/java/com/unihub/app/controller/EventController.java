@@ -61,4 +61,10 @@ public class EventController {
         eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/unrsvp")
+    public ResponseEntity<Void> unrsvpEvent(@RequestBody RsvpRequest rsvpBody) {
+        eventService.unrsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail());
+        return ResponseEntity.ok().build();
+    }
 }

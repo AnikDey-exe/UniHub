@@ -8,6 +8,7 @@ import { Event } from "@/types/responses"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { useCurrentUser } from "@/context/user-context"
 import { useRSVP } from "@/hooks/use-rsvp"
+import { useUnRSVP } from "@/hooks/use-unrsvp"
 import { useEvent } from "@/hooks/use-event"
 
 interface EventDetailsClientProps {
@@ -19,6 +20,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const { user } = useCurrentUser()
   const { data: eventData } = useEvent(event.id, event)
   const rsvpMutation = useRSVP(event.id)
+  const unrsvpMutation = useUnRSVP(event.id)
 
   const attendeesCount = eventData?.attendees?.length || 0
   const university = eventData?.creator 
@@ -30,16 +32,12 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   )
 
   const handleRSVP = () => {
-    if (rsvpMutation.isPending) {
+    if (rsvpMutation.isPending || unrsvpMutation.isPending) {
       return
     }
   
     if (!user) {
       router.push('/login')
-      return
-    }
-  
-    if (isRegistered) {
       return
     }
 
@@ -49,13 +47,23 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
       return
     }
 
-    rsvpMutation.mutate({
-      rsvpData: {
-        eventId: event.id,
-        userEmail: user.email,
-      },
-      token,
-    })
+    if (isRegistered) {
+      unrsvpMutation.mutate({
+        rsvpData: {
+          eventId: event.id,
+          userEmail: user.email,
+        },
+        token,
+      })
+    } else {
+      rsvpMutation.mutate({
+        rsvpData: {
+          eventId: event.id,
+          userEmail: user.email,
+        },
+        token,
+      })
+    }
   }
   
   return (
@@ -93,13 +101,15 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
               size="lg" 
               className="w-full md:w-auto rounded-md"
               onClick={handleRSVP}
-              disabled={isRegistered || rsvpMutation.isPending}
+              disabled={rsvpMutation.isPending || unrsvpMutation.isPending}
             >
               {rsvpMutation.isPending 
                 ? 'Registering...' 
-                : isRegistered 
-                  ? 'Registered' 
-                  : 'Register'}
+                : unrsvpMutation.isPending
+                  ? 'Unregistering...'
+                  : isRegistered 
+                    ? 'Unregister' 
+                    : 'Register'}
             </Button>
           </div>
         </div>
