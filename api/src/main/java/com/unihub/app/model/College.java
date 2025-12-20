@@ -1,5 +1,6 @@
 package com.unihub.app.model;
 
+import com.unihub.app.util.VectorConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -27,6 +28,10 @@ public class College {
     private String location;
 
     private String thumbnail;
+
+    @Column(columnDefinition = "vector(1536)")
+    @Convert(converter = VectorConverter.class)
+    private float[] embedding;
 
     @OneToMany(mappedBy = "college", cascade = CascadeType.ALL)
     @ToString.Exclude

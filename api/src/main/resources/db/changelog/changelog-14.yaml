@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1766254536845-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: embedding
+            type: VECTOR(1536)
+        tableName: college
+

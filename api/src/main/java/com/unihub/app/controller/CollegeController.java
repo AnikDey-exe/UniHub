@@ -31,4 +31,11 @@ public class CollegeController {
     public ResponseEntity<CollegeDTO> saveCollege(@RequestBody College college) {
         return ResponseEntity.ok().body(collegeService.saveCollege(college));
     }
+
+//    @PostMapping("/scrape")
+//    public ResponseEntity<String> scrapeColleges() {
+//        collegeService.scrapeColleges();
+//        return ResponseEntity.ok().body("Successfully scraped colleges");
+//    }
+
 }

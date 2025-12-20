@@ -1,19 +1,30 @@
 package com.unihub.app.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.unihub.app.dto.CollegeDTO;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.exception.UserNotFoundException;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.College;
 import com.unihub.app.repository.CollegeRepo;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.unihub.app.util.UrlFormatter.extractDomain;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +35,20 @@ public class CollegeService {
 
     @Autowired
     private DTOMapper dtoMapper;
+
+    @Value("${colleges.api-key}")
+    private String apiKey;
+
+    @Value("${colleges_image.api-key}")
+    private String imageApiKey;
+
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    private OpenAIService openAIService;
+
+    @Autowired
+    private EntityManager em;
 
     public List<CollegeDTO> getAllColleges(){
         List<College> colleges = collegeRepo.findAll();
@@ -41,5 +66,110 @@ public class CollegeService {
         CollegeDTO collegeDTO = dtoMapper.toCollegeDTO(savedCollege);
 
         return collegeDTO;
+    }
+
+    private boolean imageExists(String imageUrl) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    imageUrl,
+                    HttpMethod.HEAD,
+                    entity,
+                    String.class
+            );
+
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Async
+    public void scrapeColleges() {
+        final int PAGES = 1;
+        try {
+            for (int page = 0; page < 1; page++) {
+                String url = "https://api.data.gov/ed/collegescorecard/v1/schools?api_key=" + apiKey + "&page="+page+"&per_page=100&fields=id,school.name,school.school_url,latest.student.size,school.city,school.state";
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Content-Type", "application/json");
+
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+
+                ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+
+                JsonNode data = response.getBody().get("results");
+
+                for (int i = 0; i < data.size(); i++) {
+                    JsonNode info = data.get(i);
+
+                    String name = info.get("school.name") != null ? info.get("school.name").asText() : "";
+                    String location = info.get("school.city") != null && info.get("school.state") != null ? info.get("school.city").asText() + ", " + info.get("school.state").asText() : "";
+                    String thumbnail = null;
+
+                    String textForEmbedding = name + name + name;
+                    float[] embedding = openAIService.generateEmbedding(textForEmbedding);
+                    float norm = 0f;
+                    for (float f : embedding) {
+                        norm += f * f;
+                    }
+                    norm = (float) Math.sqrt(norm);
+
+                    if (norm > 0) {
+                        for (int j = 0; j < embedding.length; j++) {
+                            embedding[j] /= norm;
+                        }
+                    }
+
+                    StringBuilder sb = new StringBuilder("[");
+                    for (int j = 0; j < embedding.length; j++) {
+                        sb.append(embedding[j]);
+                        if (j < embedding.length - 1) {
+                            sb.append(",");
+                        }
+                    }
+                    sb.append("]");
+                    String embeddingLiteral = sb.toString();
+
+                    if (info.get("school.school_url") != null) {
+                        String extractedUrl = extractDomain(info.get("school.school_url").asText());
+
+                        System.out.println("School name: " + info.get("school.name").asText());
+                        System.out.println("Extracted school url: " + extractedUrl);
+
+                        thumbnail = "https://img.logo.dev/" + extractedUrl + "?token=" + imageApiKey;
+                    }
+
+                    College college = new College();
+                    college.setEmbedding(embedding);
+                    college.setName(name);
+                    college.setLocation(location);
+                    college.setThumbnail(thumbnail);
+                    // default image url: "https://uniacco-blog-assets.gumlet.io/blog/wp-content/uploads/2024/04/13162649/college-vs-university-scaled.webp"
+
+                    String sql = String.format("""
+                        INSERT INTO events.college (
+                            name, location, thumbnail, embedding
+                        )
+                        VALUES (
+                            :name, :location, :thumbnail, '%s'::vector
+                        )
+                        RETURNING id
+                        """, embeddingLiteral);
+
+                    Integer generatedId = (Integer) em.createNativeQuery(sql)
+                            .setParameter("name", college.getName())
+                            .setParameter("location", college.getLocation())
+                            .setParameter("thumbnail", college.getThumbnail())
+                            .getSingleResult();
+
+                    college.setId(generatedId);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to scrape colleges ", e);
+        }
     }
 }
