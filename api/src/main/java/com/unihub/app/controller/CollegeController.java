@@ -1,11 +1,10 @@
 package com.unihub.app.controller;
 
 import com.unihub.app.dto.CollegeDTO;
-import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.request.CollegeSearchRequest;
+import com.unihub.app.dto.response.SearchedCollegesResponse;
 import com.unihub.app.model.College;
-import com.unihub.app.model.Event;
 import com.unihub.app.service.CollegeService;
-import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,19 @@ public class CollegeController {
         return ResponseEntity.ok().body(collegeService.saveCollege(college));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<SearchedCollegesResponse> getSearchedColleges(
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "3") int limit,
+            @RequestParam(required = false) String lastNameASC
+    ) {
+        CollegeSearchRequest request = new CollegeSearchRequest(location, searchQuery, sortBy, limit, lastNameASC);
+        return ResponseEntity.ok().body(collegeService.getColleges(request));
+    }
+
+    // will need to run scraping script in prod
 //    @PostMapping("/scrape")
 //    public ResponseEntity<String> scrapeColleges() {
 //        collegeService.scrapeColleges();

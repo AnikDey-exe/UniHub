@@ -37,7 +37,8 @@ public class EventController {
             @RequestParam(required = false, defaultValue = "recency") String sortBy,
             @RequestParam(required = false, defaultValue = "3") int limit,
             @RequestParam(required = false) Integer lastNumAttendees,
-            @RequestParam(required = false) Instant lastStartDate) {
+            @RequestParam(required = false) Instant lastStartDate
+    ) {
         EventSearchRequest searchRequest = new EventSearchRequest(
                 types, startDate, endDate, minAttendees, searchQuery,
                 sortBy, limit, lastNumAttendees, lastStartDate

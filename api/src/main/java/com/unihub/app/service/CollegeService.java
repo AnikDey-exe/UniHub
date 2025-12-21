@@ -3,11 +3,12 @@ package com.unihub.app.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.unihub.app.dto.CollegeDTO;
 import com.unihub.app.dto.DTOMapper;
-import com.unihub.app.exception.UserNotFoundException;
-import com.unihub.app.model.AppUser;
+import com.unihub.app.dto.request.CollegeSearchRequest;
+import com.unihub.app.dto.response.SearchedCollegesResponse;
 import com.unihub.app.model.College;
 import com.unihub.app.repository.CollegeRepo;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.unihub.app.util.UrlFormatter.extractDomain;
 
@@ -68,22 +71,108 @@ public class CollegeService {
         return collegeDTO;
     }
 
-    private boolean imageExists(String imageUrl) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+    public SearchedCollegesResponse getColleges(CollegeSearchRequest request) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT *, ");
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                    imageUrl,
-                    HttpMethod.HEAD,
-                    entity,
-                    String.class
-            );
+        float[] embedding = null;
+        Float[] embeddingObj = null;
+        if (request.getSearchQuery() != null) {
+            embedding = openAIService.generateEmbedding(request.getSearchQuery());
+            embeddingObj = new Float[embedding.length];
 
-            return response.getStatusCode().is2xxSuccessful();
-        } catch (Exception e) {
-            return false;
+            float norm = 0f;
+            for (float f : embedding) {
+                norm += f * f;
+            }
+            norm = (float) Math.sqrt(norm);
+            if (norm > 0) {
+                for (int i = 0; i < embedding.length; i++) {
+                    embedding[i] /= norm;
+                }
+            }
+
+            for (int i = 0; i < embedding.length; i++) {
+                embeddingObj[i] = embedding[i];
+            }
+            String embeddingLiteral = "[" + Arrays.stream(embeddingObj)
+                    .map(f -> Float.toString(f))
+                    .collect(Collectors.joining(",")) + "]";
+
+            sql.append("(c.embedding <=> '").append(embeddingLiteral).append("'::vector) AS distance ");
+        } else {
+            sql.append("NULL AS similarity ");
         }
+
+        sql.append("FROM events.college c WHERE 1=1 ");
+        if (request.getLocation() != null) {
+            sql.append("AND LOWER(c.location) LIKE LOWER(CONCAT('%', :location, '%')) ");
+        }
+        if (request.getLastNameASC() != null) {
+            sql.append("AND c.name > :name ");
+        }
+
+        if (embedding != null) {
+            float similarityThreshold = 0.9f;
+            String embeddingLiteral = "[" + Arrays.stream(embeddingObj)
+                    .map(f -> Float.toString(f))
+                    .collect(Collectors.joining(",")) + "]";
+            float distanceThreshold = 1 - similarityThreshold;
+
+            sql.append("AND (c.embedding <=> '").append(embeddingLiteral).append("'::vector <= ")
+                    .append(distanceThreshold)
+                    .append(") ");
+        }
+
+        sql.append("ORDER BY ");
+        if ("name_asc".equals(request.getSortBy())) {
+            sql.append("c.name ASC, ");
+        } else {
+            sql.append("c.name ASC, ");
+        }
+
+        if (embedding != null) {
+            String embeddingLiteral = "[" + Arrays.stream(embeddingObj)
+                    .map(f -> Float.toString(f))
+                    .collect(Collectors.joining(",")) + "]";
+            sql.append("(c.embedding <=> '").append(embeddingLiteral).append("'::vector) ASC, ");
+        }
+        sql.append("c.id ASC ");
+        sql.append("LIMIT :limit");
+
+        Query query = em.createNativeQuery(sql.toString(), College.class);
+
+        if (request.getLocation() != null) {
+            query.setParameter("location", request.getLocation());
+        }
+        if (request.getLastNameASC() != null) {
+            query.setParameter("name", request.getLastNameASC());
+        }
+        query.setParameter("limit", request.getLimit());
+
+        List<College> colleges = query.getResultList();
+        List<CollegeDTO> collegeDTOs = new ArrayList<>();
+
+        for (College college : colleges) {
+            collegeDTOs.add(dtoMapper.toCollegeDTO(college));
+        }
+
+        SearchedCollegesResponse response;
+        if (colleges.size() == request.getLimit()) {
+            response = new SearchedCollegesResponse(
+                    collegeDTOs,
+                    colleges.get(request.getLimit() - 1).getName(),
+                    true
+            );
+        } else {
+            response = new SearchedCollegesResponse(
+                    collegeDTOs,
+                    "",
+                    false
+            );
+        }
+
+        return response;
     }
 
     @Async
