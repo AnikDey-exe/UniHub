@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_college_indexes
+      author: anik dey
+      changes:
+        - createIndex:
+            indexName: idx_college_name
+            tableName: college
+            schemaName: events
+            columns:
+              - column:
+                  name: name
+        - createIndex:
+            indexName: idx_college_location
+            tableName: college
+            schemaName: events
+            columns:
+              - column:
+                  name: location
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE INDEX IF NOT EXISTS idx_college_embedding 
+              ON events.college 
+              USING ivfflat (embedding vector_cosine_ops) 
+              WITH (lists = 100);

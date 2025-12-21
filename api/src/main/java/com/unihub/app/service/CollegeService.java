@@ -78,7 +78,21 @@ public class CollegeService {
         float[] embedding = null;
         Float[] embeddingObj = null;
         if (request.getSearchQuery() != null) {
-            embedding = openAIService.generateEmbedding(request.getSearchQuery());
+            String prompt = String.format(
+                    "The user searched for: '%s'. " +
+                            "This might be an abbreviation or nickname for a college. " +
+                            "Provide the full official college name that matches this query. " +
+                            "If it's already a full name, return it as-is. " +
+                            "Examples: 'MIT' -> 'Massachusetts Institute of Technology', " +
+                            "'Georgia Tech' -> 'Georgia Institute of Technology', " +
+                            "'Harvard' -> 'Harvard University'. " +
+                            "Only respond with the college name, nothing else." +
+                            "If you are not sure, respond with the word 'NONE'.",
+                    request.getSearchQuery().replace("\"", "\\\"") // Escape quotes
+            );
+            String refinedQuery = openAIService.generateFastCompletion(prompt);
+
+            embedding = openAIService.generateEmbedding(refinedQuery);
             embeddingObj = new Float[embedding.length];
 
             float norm = 0f;

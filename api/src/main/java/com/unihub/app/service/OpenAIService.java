@@ -42,5 +42,32 @@ public class OpenAIService {
 
         return embedding;
     }
+
+    public String generateFastCompletion(String prompt) {
+        String url = "https://api.openai.com/v1/chat/completions";
+
+        String requestBody = String.format(
+                "{\"model\": \"gpt-4o-mini\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"max_completion_tokens\": 100}",
+                prompt.replace("\n", "\\n")
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + apiKey);
+        headers.set("Content-Type", "application/json");
+
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.POST, entity, JsonNode.class);
+
+            JsonNode data = response.getBody();
+            String expandedName = data.get("choices").get(0).get("message").get("content").asText().trim();
+
+            return expandedName;
+        } catch (Exception e) {
+            System.err.println("Query expansion failed: " + e.getMessage());
+            return "NONE";
+        }
+    }
 }
 
