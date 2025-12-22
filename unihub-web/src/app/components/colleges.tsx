@@ -29,8 +29,16 @@ export function CollegesSection({ colleges }: { colleges: College[] }) {
               key={college.name}
               className="p-4 flex flex-col items-center justify-center text-center hover:shadow-lg transition-shadow"
             >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                <span className="text-lg font-bold text-primary">{college.name.split(" ").map(word => word[0]).join("")}</span>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 overflow-hidden">
+                {college.thumbnail ? (
+                  <img 
+                    src={college.thumbnail} 
+                    alt={college.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-primary">{college.name.split(" ").map(word => word[0]).join("")}</span>
+                )}
               </div>
               <h3 className="font-semibold text-sm mb-1">{college.name}</h3>
               <p className="text-xs text-muted-foreground">{college.students?.length} students</p>

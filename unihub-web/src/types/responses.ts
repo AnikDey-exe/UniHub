@@ -69,3 +69,9 @@ export interface College {
     thumbnail?: string;
     students?: UserSummary[];
 }
+
+export interface CollegeSearchResponse {
+    colleges: College[];
+    lastNameASC: string;
+    hasNext: boolean;
+}

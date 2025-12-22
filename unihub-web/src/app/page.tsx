@@ -12,8 +12,8 @@ async function EventsList() {
 }
 
 async function CollegesList() {
-  const colleges = await collegesAPI.getAllColleges();
-  return <CollegesSection colleges={colleges} />;
+  const colleges = await collegesAPI.getAllColleges({limit: 6, searchQuery: "uga"});
+  return <CollegesSection colleges={colleges.colleges} />;
 }
 
 export default async function HomePage() {

@@ -1,5 +1,5 @@
-import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest } from "@/types/requests";
-import { LoginResponse, User, Event, College, EventSearchResponse } from "@/types/responses";
+import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest, CollegeSearchRequest } from "@/types/requests";
+import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse } from "@/types/responses";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
@@ -129,10 +129,20 @@ export const usersAPI = {
 };
 
 export const collegesAPI = {
-  getAllColleges: () =>
-    apiFetch<College[]>(`/api/colleges/`, {
-      method: 'GET',
-    }),
+  getAllColleges: (filters: CollegeSearchRequest) => {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value));
+        }
+      });
+    }
+
+    const queryString = params.toString();
+    const endpoint = queryString ? `/api/colleges/search?${queryString}` : '/api/colleges/search';
+    return apiFetch<CollegeSearchResponse>(endpoint, { method: 'GET' })
+  }
 };
 
 

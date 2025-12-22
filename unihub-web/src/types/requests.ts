@@ -59,6 +59,14 @@ export interface EventSearchRequest {
     lastStartDate?: string;
 }
 
+export interface CollegeSearchRequest {
+    location?: string;
+    searchQuery?: string;
+    sortBy?: string;
+    limit?: number;
+    lastNameASC?: string;
+}
+
 export interface RSVPRequest {
     eventId: number;
     userEmail: string;
