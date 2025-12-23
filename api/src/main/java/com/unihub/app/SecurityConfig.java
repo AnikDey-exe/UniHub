@@ -2,13 +2,16 @@ package com.unihub.app;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -36,16 +39,22 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // No auth needed
+                        .requestMatchers("/api/users/register", "/api/users/login", "/oauth2/**", "/login/**").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
                         .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/search").permitAll()
                         .anyRequest()
                         .authenticated())
+                .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+        return new OAuth2SuccessHandler();
     }
 
     @Bean
