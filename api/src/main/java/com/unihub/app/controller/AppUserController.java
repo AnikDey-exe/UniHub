@@ -3,7 +3,9 @@ package com.unihub.app.controller;
 import com.unihub.app.dto.AppUserDTO;
 import com.unihub.app.dto.request.LoginRequest;
 import com.unihub.app.dto.request.UpdateUserRequest;
+import com.unihub.app.dto.request.VerificationRequest;
 import com.unihub.app.dto.response.LoginResponse;
+import com.unihub.app.dto.response.VerificationResponse;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.service.AppUserService;
 import com.unihub.app.service.JwtService;
@@ -42,6 +44,11 @@ public class AppUserController {
     @PostMapping("/register")
     public ResponseEntity<AppUserDTO> register(@RequestBody AppUser user) {
         return ResponseEntity.ok().body(appUserService.saveUser(user));
+    }
+
+    @PostMapping("/send-verification")
+    public ResponseEntity<VerificationResponse> sendVerificationCode(@RequestBody VerificationRequest userInput) {
+        return ResponseEntity.ok().body(appUserService.sendVerificationEmail(userInput.getUserEmail()));
     }
 
     @PostMapping("/login")

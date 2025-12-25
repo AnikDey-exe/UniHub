@@ -32,7 +32,7 @@ public class EmailService {
 
             return "Mail sent successfully.";
         } catch (Exception e) {
-            return "Error while sending email.";
+            return "Error while sending email. "+e;
         }
     }
 

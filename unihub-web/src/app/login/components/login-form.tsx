@@ -110,7 +110,7 @@ export function LoginForm() {
                 className="w-full h-11 text-base font-medium"
                 onClick={() => {
                   // TODO: Implement Google sign-in
-                  console.log('Sign in with Google clicked')
+                  window.location.href = 'http://localhost:8081/oauth2/authorization/google'
                 }}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -127,8 +127,11 @@ export function LoginForm() {
                 variant="outline"
                 className="w-full h-11 text-base font-medium"
                 onClick={() => {
-                  // TODO: Implement Microsoft sign-in
-                  console.log('Sign in with Microsoft clicked')
+                  const clientId = process.env.NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID;
+                  const redirectUri = "http://localhost:8081/login/oauth2/code/microsoft";
+                  const scope = "openid email profile";
+                  const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&response_mode=query&scope=${encodeURIComponent(scope)}&prompt=select_account`;
+                  window.location.href = url;
                 }}
               >
                 <svg className="w-5 h-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">

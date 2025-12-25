@@ -39,7 +39,7 @@ export function ProfileClient() {
   const eventsCreatedCount = eventsCreated.length
 
   const fullName = `${user.firstName} ${user.lastName}`
-  const university = "Stanford University"
+  const university = user.college?.name || "University"
 
   const convertEventSummaryToEvent = (eventSummary: EventSummary): Event => ({
     ...eventSummary,

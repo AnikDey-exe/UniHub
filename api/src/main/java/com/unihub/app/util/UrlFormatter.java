@@ -14,4 +14,9 @@ public class UrlFormatter {
 
         return url.trim();
     }
+
+    public static String extractEmailDomain(String email) {
+        if (email == null || !email.contains("@")) throw new IllegalArgumentException("Invalid email");
+        return email.substring(email.indexOf('@') + 1).toLowerCase();
+    }
 }

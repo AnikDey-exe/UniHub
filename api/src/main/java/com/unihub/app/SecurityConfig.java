@@ -1,5 +1,6 @@
 package com.unihub.app;
 
+import com.unihub.app.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -39,14 +40,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/users/register", "/api/users/login", "/oauth2/**", "/login/**").permitAll()  // No auth needed
+                        .requestMatchers("/api/users/register", "/api/users/send-verification", "/api/users/login", "/oauth2/**", "/login/**").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
                         .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/search").permitAll()
                         .anyRequest()
                         .authenticated())
-                .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler()))
+                .oauth2Login(oauth ->
+                        oauth
+                                .authorizationEndpoint(auth ->
+                                        auth.authorizationRequestRepository(cookieAuthorizationRequestRepository())
+                                )
+                                .successHandler(oAuth2SuccessHandler())
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -56,6 +63,12 @@ public class SecurityConfig {
     public AuthenticationSuccessHandler oAuth2SuccessHandler() {
         return new OAuth2SuccessHandler();
     }
+
+    @Bean
+    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+        return new HttpCookieOAuth2AuthorizationRequestRepository();
+    }
+
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {

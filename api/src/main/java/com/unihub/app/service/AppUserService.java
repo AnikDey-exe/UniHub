@@ -2,8 +2,10 @@ package com.unihub.app.service;
 
 import com.unihub.app.dto.AppUserDTO;
 import com.unihub.app.dto.DTOMapper;
+import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.request.LoginRequest;
 import com.unihub.app.dto.request.UpdateUserRequest;
+import com.unihub.app.dto.response.VerificationResponse;
 import com.unihub.app.exception.UserNotFoundException;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.repository.AppUserRepo;
@@ -16,8 +18,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +33,8 @@ public class AppUserService {
     private AppUserRepo appUserRepo;
     @Autowired
     private DTOMapper dtoMapper;
+    @Autowired
+    private EmailService emailService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -63,6 +69,19 @@ public class AppUserService {
         return userDTO;
     }
 
+    public VerificationResponse sendVerificationEmail(String userEmail) {
+        Random random = new Random();
+        DecimalFormat decimalFormat = new DecimalFormat("000000");
+
+        int randomNumber = random.nextInt(999999)+1;
+        String verificationCode = decimalFormat.format(randomNumber);
+
+        EmailDTO email = new EmailDTO(userEmail, "Your verification code is "+verificationCode, "UniHub: Verify Your Identity");
+        emailService.sendSimpleEmailAsync(email);
+
+        return new VerificationResponse(verificationCode);
+    }
+
     public AppUser login(LoginRequest userInput) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -72,7 +91,7 @@ public class AppUserService {
         );
 
         AppUser user = appUserRepo.findByEmail(userInput.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
-
+        // check if password length is not 0 because if it is then it is OAuth2 Account
         return user;
     }
 

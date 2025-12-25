@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface CollegeRepo extends JpaRepository<College, Integer>  {
     Optional<College> findByName(String name);
+    Optional<College> findByThumbnail(String domain);
 }
 
