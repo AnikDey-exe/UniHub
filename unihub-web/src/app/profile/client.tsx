@@ -69,7 +69,16 @@ export function ProfileClient() {
 
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">{fullName}</h1>
-                <p className="text-base md:text-lg text-muted-foreground mb-4">{university}</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <p className="text-base md:text-lg text-muted-foreground">{university}</p>
+                  {user.college?.thumbnail && (
+                    <img 
+                      src={user.college.thumbnail} 
+                      alt={university}
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-border"
+                    />
+                  )}
+                </div>
                 {user.about ? (
                   <p className="text-sm md:text-base text-foreground mb-4">{user.about}</p>
                 ) : (

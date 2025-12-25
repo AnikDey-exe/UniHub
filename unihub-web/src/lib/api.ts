@@ -56,6 +56,8 @@ export const authAPI = {
       method: 'POST',
       body: JSON.stringify(userData),
     }),
+  
+  
 
   getCurrentUser: (token: string) =>
     apiFetch<User>('/api/users/me', {
