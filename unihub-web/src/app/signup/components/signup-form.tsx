@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSignup } from '@/hooks/use-signup'
+import { useSendVerificationEmail } from '@/hooks/use-verification'
 import { useCurrentUser } from '@/context/user-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageLoading } from '@/components/ui/loading'
+import { VerificationCodeInput } from '@/components/ui/verification-code-input'
 import { UserRegisterRequest } from '@/types/requests'
-import { Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle, Mail } from 'lucide-react'
 
 type SignupFormData = UserRegisterRequest & {
   confirmPassword: string
@@ -29,10 +31,16 @@ export function SignupForm() {
   const [errors, setErrors] = useState<Partial<SignupFormData>>({})
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isVerificationStep, setIsVerificationStep] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
+  const [verificationCode, setVerificationCode] = useState<string>('')
+  const [expectedVerificationCode, setExpectedVerificationCode] = useState<string | null>(null)
+  const [verificationKey, setVerificationKey] = useState(0)
   const { user, isLoading } = useCurrentUser()
   const router = useRouter()
 
   const signupMutation = useSignup()
+  const sendVerificationMutation = useSendVerificationEmail()
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -117,11 +125,55 @@ export function SignupForm() {
     e.preventDefault()
     
     if (validateForm()) {
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...signupData } = formData
-      console.log('signupData', signupData)
-      signupMutation.mutate(signupData)
+      sendVerificationMutation.mutate(formData.email, {
+        onSuccess: (data) => {
+          setIsVerificationStep(true)
+          setVerificationError(null)
+          setVerificationCode('')
+          setExpectedVerificationCode(data.verificationCode)
+          setVerificationKey(prev => prev + 1) // Reset verification input
+        },
+        onError: (error) => {
+          setVerificationError(error.message || 'Failed to send verification email. Please try again.')
+        }
+      })
     }
+  }
+
+  const handleVerificationCodeChange = (code: string) => {
+    setVerificationCode(code)
+    setVerificationError(null)
+  }
+
+  const handleVerifyCode = () => {
+    if (verificationCode.length !== 6) {
+      setVerificationError('Please enter the complete 6-digit code.')
+      return
+    }
+
+    setVerificationError(null)
+    
+    if (verificationCode === expectedVerificationCode) {
+      const { confirmPassword, ...signupData } = formData
+      signupMutation.mutate(signupData)
+    } else {
+      setVerificationError('Invalid verification code. Please try again.')
+    }
+  }
+
+  const handleResendVerification = () => {
+    setVerificationError(null)
+    sendVerificationMutation.mutate(formData.email, {
+      onSuccess: (data) => {
+        setVerificationError(null)
+        setVerificationCode('')
+        setExpectedVerificationCode(data.verificationCode)
+        setVerificationKey(prev => prev + 1) // Reset verification input
+      },
+      onError: (error) => {
+        setVerificationError(error.message || 'Failed to resend verification email. Please try again.')
+      }
+    })
   }
 
   return (
@@ -184,8 +236,81 @@ export function SignupForm() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <div className="grid grid-cols-2 gap-4">
+        {isVerificationStep ? (
+          <div className="space-y-6 mt-6">
+            <div className="text-center space-y-2">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Mail className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold">Check your email</h3>
+              <p className="text-sm text-muted-foreground">
+                We've sent a 6-digit verification code to <span className="font-medium text-foreground">{formData.email}</span>
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-center block">Enter verification code</Label>
+                <VerificationCodeInput
+                  key={verificationKey}
+                  onComplete={handleVerificationCodeChange}
+                  error={!!verificationError}
+                />
+                {verificationError && (
+                  <p className="text-sm text-destructive text-center">{verificationError}</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  className="w-full h-11 text-base font-medium"
+                  disabled={signupMutation.isPending || verificationCode.length !== 6}
+                  onClick={handleVerifyCode}
+                >
+                  {signupMutation.isPending
+                    ? 'Creating account...'
+                    : 'Verify Code'}
+                </Button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={sendVerificationMutation.isPending}
+                    className="text-sm text-primary hover:underline disabled:opacity-50"
+                  >
+                    {sendVerificationMutation.isPending ? 'Sending...' : "Didn't receive code? Resend"}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsVerificationStep(false)
+                    setVerificationError(null)
+                    setVerificationCode('')
+                    setExpectedVerificationCode(null)
+                    setVerificationKey(prev => prev + 1) // Reset verification input
+                  }}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  ← Back to sign up
+                </button>
+              </div>
+
+              {signupMutation.isError && (
+                <p className="text-sm text-destructive text-center">
+                  {signupMutation.error?.message || 'Account creation failed. Please try again.'}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
               <Input
@@ -335,17 +460,22 @@ export function SignupForm() {
           <Button 
             type="submit" 
             className="w-full h-11 text-base font-medium" 
-            disabled={signupMutation.isPending}
+            disabled={signupMutation.isPending || sendVerificationMutation.isPending}
           >
-            {signupMutation.isPending ? 'Creating account...' : 'Create account'}
+            {sendVerificationMutation.isPending 
+              ? 'Sending verification email...' 
+              : signupMutation.isPending 
+              ? 'Creating account...' 
+              : 'Create account'}
           </Button>
 
-          {signupMutation.isError && (
+          {signupMutation.isError && !isVerificationStep && (
             <p className="text-sm text-destructive text-center">
               {signupMutation.error?.message || 'Signup failed. Please try again.'}
             </p>
           )}
         </form>
+        )}
 
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">

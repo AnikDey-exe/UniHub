@@ -57,7 +57,11 @@ export const authAPI = {
       body: JSON.stringify(userData),
     }),
   
-  
+  sendVerificationEmail: (userEmail: string) =>
+    apiFetch<{verificationCode: string}>('/api/users/send-verification', {
+      method: 'POST',
+      body: JSON.stringify({ userEmail }),
+    }),
 
   getCurrentUser: (token: string) =>
     apiFetch<User>('/api/users/me', {
