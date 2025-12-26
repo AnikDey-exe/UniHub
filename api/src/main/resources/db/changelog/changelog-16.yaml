@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1766781963333-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: image
+            type: VARCHAR(255)
+        tableName: event
+

@@ -40,6 +40,8 @@ public class Event {
     @Column(nullable = false)
     private int capacity;
 
+    private String image;
+
     @Column(name = "num_attendees", columnDefinition = "integer default 0")
     private int numAttendees;
 
