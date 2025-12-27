@@ -3,6 +3,7 @@ package com.unihub.app.service;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.request.CreateEventRequest;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.dto.response.SearchedEventsResponse;
@@ -15,14 +16,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
+import static com.unihub.app.util.FileOperations.getFileExtension;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +46,11 @@ public class EventService {
     private EmailService emailService;
     @Autowired
     private EntityManager em;
+
+    private final S3Client s3Client;
+
+    @Value("${cloudflare.r2.bucket}")
+    private String bucket;
 
     public List<EventDTO> getAllEvents(){
         List<Event> events = eventRepo.findAll();
@@ -205,15 +216,53 @@ public class EventService {
         return dtoMapper.toEventDTO(updatedEvent);
     }
 
-    public EventDTO saveEvent(Event event) {
+    public EventDTO saveEvent(CreateEventRequest eventRequest, MultipartFile image) throws FileUploadException {
         AppUser user = null;
-        if (event.getCreator() != null) {
-            user = appUserRepo.findById(event.getCreator().getId())
+        user = appUserRepo.findById(eventRequest.getCreatorId())
                     .orElseThrow(() -> new UserNotFoundException("User not found"));
-        }
+
+        Event event = new Event();
+        event.setName(eventRequest.getName());
+        event.setDescription(eventRequest.getDescription());
+        event.setLocation(eventRequest.getLocation());
+        event.setType(eventRequest.getType());
+        event.setNumAttendees(0);
+        event.setEventTimezone(eventRequest.getEventTimezone());
+        event.setCapacity(eventRequest.getCapacity());
+        event.setEventStartDateUtc(eventRequest.getEventStartDateUtc());
+        event.setEventEndDateUtc(eventRequest.getEventEndDateUtc());
+
         if (user != null) {
             event.setCreator(user);
             user.getEventsCreated().add(event);
+        }
+
+        String original = Optional.ofNullable(image.getOriginalFilename())
+                .orElseThrow(() -> new UnsupportedMediaTypeException("Filename is missing"))
+                .toLowerCase();
+        String contentType = Optional.ofNullable(image.getContentType())
+                .orElseThrow(() -> new UnsupportedMediaTypeException("Content-Type is unknown"));
+
+        String ext = getFileExtension(original);
+        String folder = switch (ext) {
+            case "jpg","jpeg","png","gif" -> "images";
+            case "mp4","mov"              -> "videos";
+            case "pdf","doc","docx","txt" -> "documents";
+            default -> throw new UnsupportedMediaTypeException("Unsupported file type: " + contentType);
+        };
+
+        String key = String.format("%s/%s-%s", folder, UUID.randomUUID(), original);
+
+        PutObjectRequest req = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        try {
+            s3Client.putObject(req, RequestBody.fromBytes(image.getBytes()));
+        } catch (IOException e) {
+            throw new FileUploadException("File upload to Cloudflare R2 failed", e);
         }
 
         String textForEmbedding = event.getName() + event.getName() + event.getName();

@@ -1,6 +1,7 @@
 package com.unihub.app.controller;
 
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.request.CreateEventRequest;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.RsvpRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
@@ -8,10 +9,12 @@ import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.model.Event;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.List;
@@ -53,8 +56,8 @@ public class EventController {
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 
     @PostMapping("/create")
-    public ResponseEntity<EventDTO> saveEvent(@RequestBody Event event) {
-        return ResponseEntity.ok().body(eventService.saveEvent(event));
+    public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException {
+        return ResponseEntity.ok().body(eventService.saveEvent(event, image));
     }
 
     @PostMapping("/rsvp")
