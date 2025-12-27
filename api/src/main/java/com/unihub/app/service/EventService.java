@@ -237,32 +237,39 @@ public class EventService {
             user.getEventsCreated().add(event);
         }
 
-        String original = Optional.ofNullable(image.getOriginalFilename())
-                .orElseThrow(() -> new UnsupportedMediaTypeException("Filename is missing"))
-                .toLowerCase();
-        String contentType = Optional.ofNullable(image.getContentType())
-                .orElseThrow(() -> new UnsupportedMediaTypeException("Content-Type is unknown"));
+        String thumbnail = "";
 
-        String ext = getFileExtension(original);
-        String folder = switch (ext) {
-            case "jpg","jpeg","png","gif" -> "images";
-            case "mp4","mov"              -> "videos";
-            case "pdf","doc","docx","txt" -> "documents";
-            default -> throw new UnsupportedMediaTypeException("Unsupported file type: " + contentType);
-        };
+        if (image != null) {
+            String original = Optional.ofNullable(image.getOriginalFilename())
+                    .orElseThrow(() -> new UnsupportedMediaTypeException("Filename is missing"))
+                    .toLowerCase();
+            String contentType = Optional.ofNullable(image.getContentType())
+                    .orElseThrow(() -> new UnsupportedMediaTypeException("Content-Type is unknown"));
 
-        String key = String.format("%s/%s-%s", folder, UUID.randomUUID(), original);
+            String ext = getFileExtension(original);
+            String folder = switch (ext) {
+                case "jpg", "jpeg", "png", "gif" -> "images";
+                case "mp4", "mov" -> "videos";
+                case "pdf", "doc", "docx", "txt" -> "documents";
+                default -> throw new UnsupportedMediaTypeException("Unsupported file type: " + contentType);
+            };
 
-        PutObjectRequest req = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .contentType(contentType)
-                .build();
+            String key = String.format("%s/%s-%s", folder, UUID.randomUUID(), original);
 
-        try {
-            s3Client.putObject(req, RequestBody.fromBytes(image.getBytes()));
-        } catch (IOException e) {
-            throw new FileUploadException("File upload to Cloudflare R2 failed", e);
+            PutObjectRequest req = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(contentType)
+                    .build();
+
+            try {
+                s3Client.putObject(req, RequestBody.fromBytes(image.getBytes()));
+            } catch (IOException e) {
+                throw new FileUploadException("File upload to Cloudflare R2 failed", e);
+            }
+
+            // in prod change this to custom domain
+            thumbnail = String.format("https://pub-13855262101b49ee8952e3133c109be0.r2.dev/%s", key);
         }
 
         String textForEmbedding = event.getName() + event.getName() + event.getName();
@@ -295,12 +302,12 @@ public class EventService {
 
         String sql = String.format("""
             INSERT INTO events.event (
-                name, type, description, location, capacity,
+                name, type, description, location, capacity, image,
                 num_attendees, event_start_date_utc, event_end_date_utc,
                 event_timezone, creator_user_id, embedding
             )
             VALUES (
-                :name, :type, :description, :location, :capacity,
+                :name, :type, :description, :location, :capacity, :image,
                 :numAttendees, :startDate, :endDate,
                 :timezone, :creatorId, '%s'::vector
             )
@@ -313,6 +320,7 @@ public class EventService {
                 .setParameter("description", event.getDescription())
                 .setParameter("location", event.getLocation())
                 .setParameter("capacity", event.getCapacity())
+                .setParameter("image", thumbnail)
                 .setParameter("numAttendees", event.getNumAttendees())
                 .setParameter("startDate", event.getEventStartDateUtc())
                 .setParameter("endDate", event.getEventEndDateUtc())
