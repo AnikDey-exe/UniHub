@@ -16,6 +16,7 @@ public class EventSummaryDTO {
     private String type;
     private String description;
     private String location;
+    private String image;
     private int capacity;
     private int numAttendees;
     private Instant eventStartDateUtc;
