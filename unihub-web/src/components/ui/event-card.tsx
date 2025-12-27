@@ -20,7 +20,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
         <Card className={cn("overflow-hidden cursor-pointer hover:shadow-md transition-shadow", className)}>
           <div className="h-48 w-full bg-muted">
             <img 
-              src="/placeholder.svg" 
+              src={event.image || "/placeholder.svg"} 
               alt={event.name} 
               className="h-full w-full object-cover" 
             />
@@ -60,7 +60,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
         <Card className={cn("overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer", className)}>
           <div className="relative h-40 w-full overflow-hidden bg-muted">
             <img 
-              src="/placeholder.svg" 
+              src={event.image || "/placeholder.svg"} 
               alt={event.name} 
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200" 
             />
@@ -104,7 +104,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
     <Link href={`/events/${event.id}`} className="h-full">
       <Card className={cn("overflow-hidden hover:shadow-lg transition-shadow p-0 cursor-pointer h-full flex flex-col", className)}>
         <div className="relative h-48 w-full overflow-hidden bg-muted flex-shrink-0">
-          <img src="/placeholder.svg" alt={event.name} className="h-full w-full object-cover" />
+          <img src={event.image || "/placeholder.svg"} alt={event.name} className="h-full w-full object-cover" />
           <Badge className="absolute top-3 right-3 bg-background/90 text-foreground hover:bg-background">
             {event.type}
           </Badge>

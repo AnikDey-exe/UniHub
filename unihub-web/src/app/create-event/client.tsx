@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { ImageIcon, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageLoading } from "@/components/ui/loading"
@@ -38,9 +39,10 @@ export function CreateEventClient() {
   const router = useRouter()
   const createEventMutation = useCreateEvent()
 
-  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creator'> & {
+  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creatorId'> & {
     startDate: Date | null
     endDate: Date | null
+    image: File | null
   }>({
     name: "",
     type: "",
@@ -50,7 +52,10 @@ export function CreateEventClient() {
     eventTimezone: "EST",
     startDate: null,
     endDate: null,
+    image: null,
   })
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const [errors, setErrors] = useState<Partial<Record<keyof EventCreateRequest, string>>>({})
 
@@ -68,12 +73,29 @@ export function CreateEventClient() {
     return null
   }
 
-  const handleInputChange = (field: keyof typeof formData, value: string | number | Date | null) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | number | Date | null | File) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field as keyof EventCreateRequest]) {
       setErrors((prev) => ({ ...prev, [field as keyof EventCreateRequest]: undefined }))
     }
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleInputChange("image", file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    handleInputChange("image", null)
+    setImagePreview(null)
   }
 
   const validateForm = (): boolean => {
@@ -132,24 +154,27 @@ export function CreateEventClient() {
       return
     }
 
-    // Convert dates to UTC ISO strings
-    const eventData: EventCreateRequest = {
-      name: formData.name,
-      type: formData.type,
-      description: formData.description || undefined,
-      location: formData.location,
-      capacity: formData.capacity,
-      eventTimezone: formData.eventTimezone,
-      eventStartDateUtc: dayjs(formData.startDate).utc().toISOString(),
-      eventEndDateUtc: dayjs(formData.endDate).utc().toISOString(),
-      creator: {
-        id: user.id,
-      }
+    // Create FormData
+    const formDataToSend = new FormData()
+    formDataToSend.append('name', formData.name)
+    formDataToSend.append('type', formData.type)
+    if (formData.description) {
+      formDataToSend.append('description', formData.description)
+    }
+    formDataToSend.append('location', formData.location)
+    formDataToSend.append('capacity', formData.capacity.toString())
+    formDataToSend.append('eventTimezone', formData.eventTimezone)
+    formDataToSend.append('eventStartDateUtc', dayjs(formData.startDate).utc().toISOString())
+    formDataToSend.append('eventEndDateUtc', dayjs(formData.endDate).utc().toISOString())
+    formDataToSend.append('creatorId', user.id.toString())
+    
+    if (formData.image) {
+      formDataToSend.append('image', formData.image)
     }
 
     try {
       const createdEvent = await createEventMutation.mutateAsync({
-        eventData,
+        formData: formDataToSend,
         token,
       })
       router.push(`/events/${createdEvent.id}`)
@@ -213,6 +238,65 @@ export function CreateEventClient() {
                   onChange={(e) => handleInputChange("description", e.target.value)}
                   className="min-h-[120px]"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image">Event Image</Label>
+                <div className="relative">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  {imagePreview ? (
+                    <div className="relative w-full h-64 rounded-lg overflow-hidden border border-border">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Label
+                          htmlFor="image"
+                          className="cursor-pointer"
+                        >
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Change Image
+                          </Button>
+                        </Label>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleRemoveImage}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Label
+                      htmlFor="image"
+                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                    </Label>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

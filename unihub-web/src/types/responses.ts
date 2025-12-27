@@ -33,6 +33,7 @@ export interface Event {
     type: string;
     description?: string;
     location: string;
+    image?: string;
     capacity: number;
     numAttendees: number;
     eventStartDateUtc: string;
@@ -55,6 +56,7 @@ export interface EventSummary {
     type: string;
     description?: string;
     location: string;
+    image?: string;
     capacity: number;
     numAttendees: number;
     eventStartDateUtc: string;

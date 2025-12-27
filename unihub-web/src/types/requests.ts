@@ -30,13 +30,12 @@ export interface EventCreateRequest {
     type: string;
     description?: string;
     location: string;
+    image?: File;
     capacity: number;
     eventStartDateUtc: string;
     eventEndDateUtc: string;
     eventTimezone: string;
-    creator: {
-        id: number;
-    }
+    creatorId: number;
 }
 
 export interface EventUpdateRequest {

@@ -71,9 +71,19 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-12 mb-12">
           <div className="w-full bg-muted rounded-lg overflow-hidden">
-            <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground text-sm">Event Image</span>
-            </div>
+            {eventData?.image ? (
+              <div className="w-full aspect-[4/3] bg-muted overflow-hidden">
+                <img 
+                  src={eventData.image} 
+                  alt={eventData.name || "Event image"} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">Event Image</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col justify-center space-y-6">

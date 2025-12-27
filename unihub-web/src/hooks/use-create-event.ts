@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { eventsAPI } from '@/lib/api'
-import { EventCreateRequest } from '@/types/requests'
 import { Event } from '@/types/responses'
 
 export function useCreateEvent() {
   const queryClient = useQueryClient()
 
-  return useMutation<Event, Error, { eventData: EventCreateRequest; token: string }>({
-    mutationFn: ({ eventData, token }) => eventsAPI.createEvent(eventData, token),
+  return useMutation<Event, Error, { formData: FormData; token: string }>({
+    mutationFn: ({ formData, token }) => eventsAPI.createEvent(formData, token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events-search'] })
       queryClient.invalidateQueries({ queryKey: ['events-infinite-search'] })

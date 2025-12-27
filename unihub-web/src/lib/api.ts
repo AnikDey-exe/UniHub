@@ -91,11 +91,36 @@ export const eventsAPI = {
       method: 'GET',
     }),
 
-  createEvent: (eventData: EventCreateRequest, token: string) =>
-    apiFetch<Event>('/api/events/create', {
+  createEvent: (formData: FormData, token: string) => {
+    const config: RequestInit = {
       method: 'POST',
-      body: JSON.stringify(eventData),
-    }, token),
+      body: formData,
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    };
+    
+    return fetch(`${API_BASE_URL}/api/events/create`, config).then(async (response) => {
+      if (response.status === 401 && token) {
+        const error = new Error('Invalid JWT token. May have expired. Please login again.');
+        (error as any).status = 401;
+        throw error;
+      }
+
+      if (response.status === 403) {
+        const error = new Error('Forbidden. You are not authorized to access this resource.');
+        (error as any).status = 403;
+        throw error;
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    }) as Promise<Event>;
+  },
 
   updateEvent: (id: number, eventData: EventUpdateRequest) =>
     apiFetch<Event>(`/api/events/${id}`, {
