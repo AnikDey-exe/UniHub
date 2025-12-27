@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from 'react'
 import { Calendar } from '@mantine/dates'
 import { EventSummary } from '@/types/responses'
 import dayjs from 'dayjs'
@@ -7,6 +8,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import Link from 'next/link'
 import { cn } from '@/utils/cn'
+import { DayViewModal } from '@/app/profile/components/day-view-modal'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -17,6 +19,14 @@ interface EventsCalendarProps {
 }
 
 export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date)
+    setIsModalOpen(true)
+  }
+
   const getEventsForDate = (date: Date) => {
     const currentDate = dayjs(date).format('YYYY-MM-DD')
     
@@ -121,7 +131,11 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
           })
           
           return (
-            <div className="w-full h-full min-h-[100px] p-1 flex flex-col relative" style={{ width: '100%', minWidth: 0 }}>
+            <div 
+              className="w-full h-full min-h-[100px] p-1 flex flex-col relative cursor-pointer" 
+              style={{ width: '100%', minWidth: 0 }}
+              onClick={() => handleDateClick(date)}
+            >
               <div className={cn(
                 "text-sm font-medium mb-1 z-10",
                 isToday && "text-primary font-bold"
@@ -152,15 +166,19 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
                     <Link
                       key={event.id}
                       href={`/events/${event.id}`}
-                      className="block text-xs px-2 py-0.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate absolute whitespace-nowrap"
+                      className="block text-xs px-2 py-0.5 bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate absolute whitespace-nowrap z-10"
                       title={event.name}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        window.location.href = `/events/${event.id}`
+                      }}
                       style={{
                         left: `${leftOffset}%`,
                         width: `calc(${widthPercent}% + ${widthMarginOffset}px)`,
                         top: `${index * 24}px`,
                         borderRadius: borderRadius,
-                        zIndex: 1,
+                        zIndex: 10,
                       }}
                     >
                       {event.name}
@@ -174,7 +192,11 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
                     href={`/events/${event.id}`}
                     className="block text-xs px-1 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors truncate w-full relative z-10"
                     title={event.name}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      window.location.href = `/events/${event.id}`
+                    }}
                     style={{ minWidth: 0 }}
                   >
                     {event.name}
@@ -230,6 +252,13 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
             color: 'hsl(var(--muted-foreground))',
           },
         }}
+      />
+      <DayViewModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        date={selectedDate}
+        events={events}
+        timezone={timezone}
       />
     </div>
   )
