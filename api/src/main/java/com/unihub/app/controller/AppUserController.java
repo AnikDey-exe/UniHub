@@ -11,12 +11,14 @@ import com.unihub.app.service.AppUserService;
 import com.unihub.app.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,13 +39,13 @@ public class AppUserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppUserDTO> updateUserProfile(@PathVariable Integer id, @RequestBody UpdateUserRequest toUpdate) {
-        return ResponseEntity.ok().body(appUserService.updateUserProfile(id, toUpdate));
+    public ResponseEntity<AppUserDTO> updateUserProfile(@PathVariable Integer id, @ModelAttribute UpdateUserRequest toUpdate, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException {
+        return ResponseEntity.ok().body(appUserService.updateUserProfile(id, toUpdate, image));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AppUserDTO> register(@RequestBody AppUser user) {
-        return ResponseEntity.ok().body(appUserService.saveUser(user));
+    public ResponseEntity<AppUserDTO> register(@ModelAttribute AppUser user, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException {
+        return ResponseEntity.ok().body(appUserService.saveUser(user, image));
     }
 
     @PostMapping("/send-verification")

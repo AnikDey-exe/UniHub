@@ -79,6 +79,25 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String domain = extractEmailDomain(email);
         String thumbnail = "https://img.logo.dev/" + domain + "?token=pk_EtlQcX5eTPGp1A5PzwNTPQ";
 
+//        String sql = new StringBuilder()
+//                .append("SELECT * FROM college ")
+//                .append("WHERE :emailDomain = SUBSTRING(thumbnail, ")
+//                .append("LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/'), ")
+//                .append("LOCATE('?', thumbnail) - (LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/'))) ")
+//                .append("OR :emailDomain LIKE CONCAT('%.', SUBSTRING(thumbnail, ")
+//                .append("LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/'), ")
+//                .append("LOCATE('?', thumbnail) - (LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/')))) ")
+//                .append("ORDER BY LENGTH(SUBSTRING(thumbnail, ")
+//                .append("LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/'), ")
+//                .append("LOCATE('?', thumbnail) - (LOCATE('img.logo.dev/', thumbnail) + LENGTH('img.logo.dev/')))) DESC ")
+//                .append("LIMIT 1")
+//                .toString();
+//
+//        Query query = entityManager.createNativeQuery(sql, College.class);
+//        query.setParameter("emailDomain", domain);
+//
+//        College college = (College) query.getSingleResult();
+
         College college = collegeRepo
                 .findByThumbnail(thumbnail)
                 .orElseThrow(() -> new CollegeNotFoundException("College not found"));
