@@ -12,14 +12,14 @@ export const queryClient = new QueryClient({
   },
 })
 
-queryClient.getQueryCache().config.onError = (error: any) => {
+queryClient.getQueryCache().config.onError = (error: Error & { status?: number; response?: { status?: number } }) => {
   if (error?.status === 401 || error?.response?.status === 401) {
     localStorage.removeItem('token')
     window.location.href = '/login'
   }
 }
 
-queryClient.getMutationCache().config.onError = (error: any) => {
+queryClient.getMutationCache().config.onError = (error: Error & { status?: number; response?: { status?: number } }) => {
   if (error?.status === 401 || error?.response?.status === 401) {
     localStorage.removeItem('token')
     window.location.href = '/login'

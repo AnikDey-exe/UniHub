@@ -265,7 +265,7 @@ export default async function HomePage() {
                     Popular events this week
                   </h2>
                   <p className="text-base text-muted-foreground">
-                    Don't miss out on these trending events happening across campuses
+                    Don&apos;t miss out on these trending events happening across campuses
                   </p>
                 </div>
                 <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">

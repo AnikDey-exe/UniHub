@@ -14,6 +14,7 @@ export interface User {
     profilePicture?: string;
     eventsCreated?: EventSummary[];
     eventsAttended?: EventSummary[];
+    college?: CollegeSummary;
 }
 
 export interface UserSummary {
@@ -70,6 +71,13 @@ export interface College {
     location: string;
     thumbnail?: string;
     students?: UserSummary[];
+}
+
+export interface CollegeSummary {
+    id: number;
+    name: string;
+    location: string;
+    thumbnail?: string;
 }
 
 export interface CollegeSearchResponse {

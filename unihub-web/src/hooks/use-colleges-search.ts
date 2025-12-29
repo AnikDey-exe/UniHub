@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { collegesAPI } from '@/lib/api'
 import { CollegeSearchRequest } from '@/types/requests'
+import { CollegeSearchResponse } from '@/types/responses'
 
 interface UseCollegesInfiniteSearchParams {
   searchQuery?: string
@@ -29,13 +30,13 @@ export function useCollegesInfiniteSearch({
         ...searchParams
       }
       
-      if (pageParam && (pageParam as any).lastNameASC) {
-        params.lastNameASC = (pageParam as any).lastNameASC
+      if (pageParam && typeof pageParam === 'object' && 'lastNameASC' in pageParam) {
+        params.lastNameASC = pageParam.lastNameASC as string
       }
       
       return collegesAPI.getAllColleges(params)
     },
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage: CollegeSearchResponse) => {
       if (lastPage.hasNext) {
         return {
           lastNameASC: lastPage.lastNameASC

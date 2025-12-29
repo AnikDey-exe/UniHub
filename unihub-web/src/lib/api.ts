@@ -21,13 +21,13 @@ async function apiFetch<T>(
 
   if (response.status === 401 && token) {
     const error = new Error('Invalid JWT token. May have expired. Please login again.');
-    (error as any).status = 401;
+    (error as Error & { status?: number }).status = 401;
     throw error;
   }
 
   if (response.status === 403) {
     const error = new Error('Forbidden. You are not authorized to access this resource.');
-    (error as any).status = 403;
+    (error as Error & { status?: number }).status = 403;
     throw error;
   }
 
@@ -51,11 +51,33 @@ export const authAPI = {
       body: JSON.stringify({ email: loginData.email, password: loginData.password }),
     }),
 
-  register: (userData: UserRegisterRequest) =>
-    apiFetch<User>('/api/users/register', {
+  register: (formData: FormData) => {
+    const config: RequestInit = {
       method: 'POST',
-      body: JSON.stringify(userData),
-    }),
+      body: formData,
+    };
+    
+    return fetch(`${API_BASE_URL}/api/users/register`, config).then(async (response) => {
+      if (response.status === 401) {
+        const error = new Error('Invalid JWT token. May have expired. Please login again.');
+        (error as Error & { status?: number }).status = 401;
+        throw error;
+      }
+
+      if (response.status === 403) {
+        const error = new Error('Forbidden. You are not authorized to access this resource.');
+        (error as Error & { status?: number }).status = 403;
+        throw error;
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    }) as Promise<User>;
+  },
   
   sendVerificationEmail: (userEmail: string) =>
     apiFetch<{verificationCode: string}>('/api/users/send-verification', {
@@ -103,13 +125,13 @@ export const eventsAPI = {
     return fetch(`${API_BASE_URL}/api/events/create`, config).then(async (response) => {
       if (response.status === 401 && token) {
         const error = new Error('Invalid JWT token. May have expired. Please login again.');
-        (error as any).status = 401;
+        (error as Error & { status?: number }).status = 401;
         throw error;
       }
 
       if (response.status === 403) {
         const error = new Error('Forbidden. You are not authorized to access this resource.');
-        (error as any).status = 403;
+        (error as Error & { status?: number }).status = 403;
         throw error;
       }
 
@@ -152,11 +174,36 @@ export const usersAPI = {
       method: 'GET',
     }, token),
 
-  updateUserProfile: (id: number, userData: UserUpdateRequest, token: string) =>
-    apiFetch<User>(`/api/users/${id}`, {
+  updateUserProfile: (id: number, formData: FormData, token: string) => {
+    const config: RequestInit = {
       method: 'PUT',
-      body: JSON.stringify(userData),
-    }, token),
+      body: formData,
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    };
+    
+    return fetch(`${API_BASE_URL}/api/users/${id}`, config).then(async (response) => {
+      if (response.status === 401 && token) {
+        const error = new Error('Invalid JWT token. May have expired. Please login again.');
+        (error as Error & { status?: number }).status = 401;
+        throw error;
+      }
+
+      if (response.status === 403) {
+        const error = new Error('Forbidden. You are not authorized to access this resource.');
+        (error as Error & { status?: number }).status = 403;
+        throw error;
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    }) as Promise<User>;
+  },
 };
 
 export const collegesAPI = {

@@ -13,10 +13,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PageLoading } from '@/components/ui/loading'
 import { VerificationCodeInput } from '@/components/ui/verification-code-input'
 import { UserRegisterRequest } from '@/types/requests'
-import { Eye, EyeOff, CheckCircle, Mail } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle, Mail, ImageIcon, X } from 'lucide-react'
 
 type SignupFormData = UserRegisterRequest & {
   confirmPassword: string
+  image: File | null
 }
 
 export function SignupForm() {
@@ -27,6 +28,7 @@ export function SignupForm() {
     phoneNumber: '',
     password: '',
     confirmPassword: '',
+    image: null,
   })
   const [errors, setErrors] = useState<Partial<SignupFormData>>({})
   const [showPassword, setShowPassword] = useState(false)
@@ -36,6 +38,7 @@ export function SignupForm() {
   const [verificationCode, setVerificationCode] = useState<string>('')
   const [expectedVerificationCode, setExpectedVerificationCode] = useState<string | null>(null)
   const [verificationKey, setVerificationKey] = useState(0)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const { user, isLoading } = useCurrentUser()
   const router = useRouter()
 
@@ -80,6 +83,23 @@ export function SignupForm() {
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
     }
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setFormData(prev => ({ ...prev, image: file }))
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, image: null }))
+    setImagePreview(null)
   }
 
   const validateForm = (): boolean => {
@@ -154,8 +174,25 @@ export function SignupForm() {
     setVerificationError(null)
     
     if (verificationCode === expectedVerificationCode) {
-      const { confirmPassword, ...signupData } = formData
-      signupMutation.mutate(signupData)
+      const { confirmPassword, image, ...signupData } = formData
+      
+      const formDataToSend = new FormData()
+      formDataToSend.append('firstName', signupData.firstName)
+      formDataToSend.append('lastName', signupData.lastName)
+      formDataToSend.append('email', signupData.email)
+      formDataToSend.append('phoneNumber', signupData.phoneNumber)
+      formDataToSend.append('password', signupData.password)
+      if (signupData.middleName) {
+        formDataToSend.append('middleName', signupData.middleName)
+      }
+      if (signupData.about) {
+        formDataToSend.append('about', signupData.about)
+      }
+      if (image) {
+        formDataToSend.append('image', image)
+      }
+      
+      signupMutation.mutate(formDataToSend)
     } else {
       setVerificationError('Invalid verification code. Please try again.')
     }
@@ -246,7 +283,7 @@ export function SignupForm() {
               </div>
               <h3 className="text-xl font-semibold">Check your email</h3>
               <p className="text-sm text-muted-foreground">
-                We've sent a 6-digit verification code to <span className="font-medium text-foreground">{formData.email}</span>
+                We&apos;ve sent a 6-digit verification code to <span className="font-medium text-foreground">{formData.email}</span>
               </p>
             </div>
 
@@ -374,6 +411,65 @@ export function SignupForm() {
             {errors.phoneNumber && (
               <p className="text-sm text-destructive">{errors.phoneNumber}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="profilePicture" className="text-sm font-medium">Profile Picture (Optional)</Label>
+            <div className="relative">
+              <Input
+                id="profilePicture"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              {imagePreview ? (
+                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <Label
+                      htmlFor="profilePicture"
+                      className="cursor-pointer"
+                    >
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Change Image
+                      </Button>
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Label
+                  htmlFor="profilePicture"
+                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      <span className="font-semibold">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </Label>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">

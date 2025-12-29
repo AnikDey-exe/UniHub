@@ -19,15 +19,15 @@ interface EventsCalendarProps {
 }
 
 export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleDateClick = (date: Date) => {
+  const handleDateClick = (date: string) => {
     setSelectedDate(date)
     setIsModalOpen(true)
   }
 
-  const getEventsForDate = (date: Date) => {
+  const getEventsForDate = (date: string) => {
     const currentDate = dayjs(date).format('YYYY-MM-DD')
     
     return events.filter(event => {
@@ -40,7 +40,7 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
     })
   }
 
-  const getEventPosition = (event: EventSummary, date: Date) => {
+  const getEventPosition = (event: EventSummary, date: string) => {
     const currentDate = dayjs(date).format('YYYY-MM-DD')
     const eventStartDate = dayjs(event.eventStartDateUtc).tz(event.eventTimezone || timezone)
     const eventEndDate = dayjs(event.eventEndDateUtc).tz(event.eventTimezone || timezone)
@@ -213,10 +213,6 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
           )
         }}
         styles={{
-          calendar: {
-            width: '100%',
-            overflow: 'visible',
-          },
           month: {
             width: '100%',
             overflow: 'visible',
@@ -256,7 +252,7 @@ export function EventsCalendar({ events, timezone = 'UTC' }: EventsCalendarProps
       <DayViewModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        date={selectedDate}
+        date={selectedDate ? dayjs(selectedDate).toDate() : null}
         events={events}
         timezone={timezone}
       />

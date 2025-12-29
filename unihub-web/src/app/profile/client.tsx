@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Settings, List, Calendar as CalendarIcon } from "lucide-react"
+import { Settings, List, Calendar as CalendarIcon, Plus } from "lucide-react"
 import { useCurrentUser } from "@/context/user-context"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EventCard } from "@/components/ui/event-card"
@@ -91,13 +91,22 @@ export function ProfileClient() {
               </div>
             </div>
 
-            <button
-              onClick={() => router.push("/settings")}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="h-5 w-5 text-foreground" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => router.push("/create-event")}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Create Event
+              </Button>
+              <button
+                onClick={() => router.push("/settings")}
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                aria-label="Settings"
+              >
+                <Settings className="h-5 w-5 text-foreground" />
+              </button>
+            </div>
           </div>
         </div>
 

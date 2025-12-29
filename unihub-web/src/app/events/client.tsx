@@ -8,7 +8,7 @@ import { EventCard } from "@/components/ui/event-card"
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select"
 import { EVENT_TYPE_OPTIONS, EventType } from "@/types/event-types"
 import { Calendar, Search, Filter, Grid, List } from "lucide-react"
-import { Event } from "@/types/responses"
+import { Event, EventSearchResponse } from "@/types/responses"
 import { DateTimePicker } from '@mantine/dates'
 import { useEventsInfiniteSearch } from '@/hooks/use-events-search'
 import { InfiniteScroll } from '@/components/ui/infinite-scroll'
@@ -51,7 +51,7 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
   })
 
 
-  const events = data?.pages.flatMap((page: any) => page.events) || initialEvents
+  const events = data?.pages.flatMap((page: EventSearchResponse) => page.events) || initialEvents
   const filteredEvents = events
 
   const eventTypeOptions = EVENT_TYPE_OPTIONS

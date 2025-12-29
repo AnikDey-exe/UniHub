@@ -301,7 +301,10 @@ export function DayViewModal({ open, onOpenChange, date, events, timezone = 'UTC
                       width: `${widthPercent}%`,
                       left: `${leftPercent}%`,
                     }}
-                    onClick={() => onOpenChange(false)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onOpenChange(false)
+                    }}
                   >
                     {/* Event info */}
                     <div className="flex-1 min-w-0">

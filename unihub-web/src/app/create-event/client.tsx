@@ -39,7 +39,7 @@ export function CreateEventClient() {
   const router = useRouter()
   const createEventMutation = useCreateEvent()
 
-  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creatorId'> & {
+  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creatorId' | 'image'> & {
     startDate: Date | null
     endDate: Date | null
     image: File | null
@@ -52,7 +52,7 @@ export function CreateEventClient() {
     eventTimezone: "EST",
     startDate: null,
     endDate: null,
-    image: null,
+    image: null
   })
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)

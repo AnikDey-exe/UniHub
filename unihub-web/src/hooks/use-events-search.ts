@@ -2,6 +2,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { eventsAPI } from '@/lib/api'
 import { EventSearchRequest } from '@/types/requests'
 import { EventType } from '@/types/event-types'
+import { EventSearchResponse } from '@/types/responses'
 
 interface UseEventsSearchParams {
   searchQuery?: string
@@ -63,17 +64,17 @@ export function useEventsInfiniteSearch({
         ...searchParams
       }
       
-      if (pageParam) {
-        if (sortBy === 'date' && (pageParam as any).lastStartDate) {
-          params.lastStartDate = (pageParam as any).lastStartDate
-        } else if (sortBy !== 'date' && (pageParam as any).lastNumAttendees) {
-          params.lastNumAttendees = (pageParam as any).lastNumAttendees
+      if (pageParam && typeof pageParam === 'object') {
+        if (sortBy === 'date' && 'lastStartDate' in pageParam) {
+          params.lastStartDate = pageParam.lastStartDate as string
+        } else if (sortBy !== 'date' && 'lastNumAttendees' in pageParam) {
+          params.lastNumAttendees = pageParam.lastNumAttendees as number
         }
       }
       
       return eventsAPI.getAllEvents(params)
     },
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage: EventSearchResponse) => {
       if (lastPage.hasNext) {
         if (sortBy === 'date') {
           return {

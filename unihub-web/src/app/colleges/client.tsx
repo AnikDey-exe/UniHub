@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CollegeCard } from "@/components/ui/college-card"
 import { Search, Building2 } from "lucide-react"
-import { College } from "@/types/responses"
+import { College, CollegeSearchResponse } from "@/types/responses"
 import { useCollegesInfiniteSearch } from '@/hooks/use-colleges-search'
 import { InfiniteScroll } from '@/components/ui/infinite-scroll'
 
@@ -40,7 +40,7 @@ export function CollegesClient({ initialColleges }: CollegesClientProps) {
     sortBy
   })
 
-  const colleges = data?.pages.flatMap((page: any) => page.colleges) || initialColleges
+  const colleges = data?.pages.flatMap((page: CollegeSearchResponse) => page.colleges) || initialColleges
 
   return (
     <div className="min-h-screen bg-background">

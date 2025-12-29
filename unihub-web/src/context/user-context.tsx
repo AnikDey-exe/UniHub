@@ -3,9 +3,10 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import { useUser } from '@/hooks/use-user';
 import { PageLoading } from '@/components/ui/loading';
+import { User } from '@/types/responses';
 
 type UserContextType = {
-  user: any | null;
+  user: User | undefined |null;
   isLoading: boolean;
   isError: boolean;
 };

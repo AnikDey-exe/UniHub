@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { User, Moon, Eye, LogOut } from "lucide-react"
+import { User, Moon, Eye, LogOut, ImageIcon, X } from "lucide-react"
 import { useCurrentUser } from "@/context/user-context"
 import { useTheme } from "@/context/theme-context"
 import { useUpdateUser } from "@/hooks/use-update-user"
@@ -31,6 +31,8 @@ export default function SettingsClient() {
     lastName: "",
     about: "",
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const updateUserMutation = useUpdateUser(user?.id || 0)
 
@@ -48,11 +50,31 @@ export default function SettingsClient() {
         lastName: user.lastName || "",
         about: user.about || "",
       })
+      if (user.profilePicture) {
+        setImagePreview(user.profilePicture)
+      }
     }
   }, [user])
 
   const handleInputChange = (field: keyof UserUpdateRequest, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
   }
 
   const handleSave = async () => {
@@ -67,9 +89,30 @@ export default function SettingsClient() {
       return
     }
 
+    // Create FormData
+    const formDataToSend = new FormData()
+    if (formData.firstName) {
+      formDataToSend.append('firstName', formData.firstName)
+    }
+    if (formData.lastName) {
+      formDataToSend.append('lastName', formData.lastName)
+    }
+    if (formData.middleName) {
+      formDataToSend.append('middleName', formData.middleName)
+    }
+    if (formData.phoneNumber) {
+      formDataToSend.append('phoneNumber', formData.phoneNumber)
+    }
+    if (formData.about) {
+      formDataToSend.append('about', formData.about)
+    }
+    if (imageFile) {
+      formDataToSend.append('image', imageFile)
+    }
+
     try {
       await updateUserMutation.mutateAsync({
-        userData: formData,
+        formData: formDataToSend,
         token,
       })
     } catch (error) {
@@ -161,6 +204,65 @@ export default function SettingsClient() {
           <div className="flex-1">
             {activeSection === "profile" && (
               <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="profilePicture">Profile Picture</Label>
+                  <div className="relative">
+                    <Input
+                      id="profilePicture"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    {imagePreview ? (
+                      <div className="relative w-full h-64 rounded-lg overflow-hidden border border-border">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Label
+                            htmlFor="profilePicture"
+                            className="cursor-pointer"
+                          >
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Change Image
+                            </Button>
+                          </Label>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleRemoveImage}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Label
+                        htmlFor="profilePicture"
+                        className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                          <p className="mb-2 text-sm text-muted-foreground">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                      </Label>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>

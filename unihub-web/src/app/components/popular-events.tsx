@@ -10,7 +10,7 @@ export function PopularEvents({ events }: { events: Event[] }) {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight mb-4 md:text-4xl text-balance">Popular events this week</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-pretty">
-            Don't miss out on these trending events happening across campuses
+            Don&apos;t miss out on these trending events happening across campuses
           </p>
         </div>
 

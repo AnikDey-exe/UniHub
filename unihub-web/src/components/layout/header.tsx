@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, Menu, User } from "lucide-react";
+import { Calendar, Menu, User, Plus } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { useCurrentUser } from "@/context/user-context";
 
@@ -89,6 +89,11 @@ export function Header() {
                   <DropdownMenuLabel>{user.firstName} {user.lastName}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
+                    <Link href="/create-event" className="w-full">
+                      Create Event
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
                     <Link href="/profile" className="w-full">
                       Profile
                     </Link>
@@ -159,6 +164,11 @@ export function Header() {
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Link href="/create-event" className="w-full">
+                        Create Event
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Link href="/profile" className="w-full">
                         Profile

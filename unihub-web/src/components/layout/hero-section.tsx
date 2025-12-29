@@ -17,7 +17,7 @@ export function HeroSection() {
 
           <p className="mb-8 text-lg text-muted-foreground text-pretty md:text-xl leading-relaxed max-w-2xl mx-auto">
             Connect with your college community through concerts, workshops, sports, and social gatherings. Never miss
-            out on what's happening around you.
+            out on what&apos;s happening around you.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
