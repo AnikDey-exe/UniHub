@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/health").permitAll()
                         .requestMatchers("/api/users/register", "/api/users/send-verification", "/api/users/login", "/oauth2/**", "/login/**").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
@@ -74,6 +75,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+//        change when uploading to prod
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","OPTIONS","DELETE"));
         configuration.setAllowedHeaders(List.of("*"));

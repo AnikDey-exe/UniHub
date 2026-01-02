@@ -53,6 +53,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         String jwt = jwtService.generateToken(dbUser);
 
+//        change when uploading to prod
         response.sendRedirect("http://localhost:3000/oauth-success?token=" + jwt);
     }
 
