@@ -1,0 +1,63 @@
+name: Deploy API to ECS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "api/**"
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Java
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Build the Spring Boot JAR
+      - name: Build JAR
+        working-directory: api
+        run: ./mvnw clean package -DskipTests
+
+      # Login to Docker Hub
+      - name: Docker Hub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build & push Docker image with linux/amd64 platform
+      - name: Build and push Docker image
+        working-directory: api
+        run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/unihub-api
+          docker buildx build --platform linux/amd64 -t $IMAGE:latest --push .
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Force ECS redeploy
+      - name: Redeploy ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_API_SERVICE }} \
+            --force-new-deployment
