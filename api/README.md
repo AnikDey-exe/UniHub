@@ -22,3 +22,7 @@ To push to DockerHub, in terminal:
 1. `docker login`
 2. `docker tag anikdey/unihub-api:latest anikdey/unihub-api:latest`
 3. `docker push anikdey/unihub-api:latest`
+
+Test CI/CD workflow change, in terminal:
+1. `docker pull anikdey/unihub-api:latest`
+2. `docker run --env-file .env -p 8081:8081 anikdey/unihub-api:latest`
