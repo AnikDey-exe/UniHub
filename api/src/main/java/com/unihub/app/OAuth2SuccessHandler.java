@@ -9,6 +9,7 @@ import com.unihub.app.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -32,6 +33,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private CollegeRepo collegeRepo;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -54,7 +58,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String jwt = jwtService.generateToken(dbUser);
 
 //        change when uploading to prod
-        response.sendRedirect("http://localhost:3000/oauth-success?token=" + jwt);
+        response.sendRedirect(frontendUrl+"/oauth-success?token=" + jwt);
     }
 
     private String extractEmail(OAuth2User user) {
