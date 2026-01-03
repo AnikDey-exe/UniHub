@@ -5,6 +5,9 @@ import { eventsAPI } from "@/lib/api"
 import { SectionLoading } from "@/components/ui/loading"
 import { notFound } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+
 async function EventDetails({ id }: { id: number }) {
   try {
     const event = await eventsAPI.getEventById(id)

@@ -77,6 +77,7 @@ public class SecurityConfig {
 
 //        change when uploading to prod
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("https://3u8e7mvzmi.us-east-2.awsapprunner.com"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","OPTIONS","DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

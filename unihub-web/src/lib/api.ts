@@ -1,7 +1,9 @@
 import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest, CollegeSearchRequest } from "@/types/requests";
 import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse } from "@/types/responses";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+const API_BASE_URL = typeof window === 'undefined' 
+? process.env.API_URL  // Server-side: use host.docker.internal
+: process.env.NEXT_PUBLIC_API_URL;
 
 async function apiFetch<T>(
   endpoint: string,
