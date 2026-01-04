@@ -229,7 +229,7 @@ export function SignupForm() {
               variant="outline"
               className="w-full h-11 text-base font-medium"
               onClick={() => {
-                window.location.href = 'http://localhost:8081/oauth2/authorization/google'
+                window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/oauth2/authorization/google`
               }}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -247,7 +247,7 @@ export function SignupForm() {
               className="w-full h-11 text-base font-medium"
               onClick={() => {
                 const clientId = process.env.NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID;
-                const redirectUri = "http://localhost:8081/login/oauth2/code/microsoft";
+                const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/login/oauth2/code/microsoft1`;
                 const scope = "openid email profile";
                 const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&response_mode=query&scope=${encodeURIComponent(scope)}&prompt=select_account`;
                 window.location.href = url;
