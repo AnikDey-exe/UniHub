@@ -7,6 +7,12 @@ FROM node:22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID=$NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID
     
 # Copy package.json and package-lock.json first (for caching)
 COPY package.json package-lock.json* ./

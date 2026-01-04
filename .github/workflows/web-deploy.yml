@@ -34,8 +34,12 @@ jobs:
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           IMAGE=$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}
-
-          docker buildx build --platform linux/amd64 -t $IMAGE:latest --push .
+          docker buildx build \
+          --platform linux/amd64 \
+          --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+          --build-arg NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID=${{ secrets.NEXT_PUBLIC_MICROSOFT_OAUTH_CLIENT_ID }} \
+          -t $IMAGE:latest \
+          --push .
 
       # Trigger App Runner deployment
       - name: Redeploy App Runner
