@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "https://3u8e7mvzmi.us-east-2.awsapprunner.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://3u8e7mvzmi.us-east-2.awsapprunner.com", "https://www.joinunihub.com"})
 public class AppUserController {
     @Autowired
     private AppUserService appUserService;
