@@ -9,6 +9,8 @@ import { Calendar, Users, Sparkles, TrendingUp, Zap, Music, Gamepad2, Graduation
 import { EventCard } from "@/components/ui/event-card"
 import { Card } from "@/components/ui/card"
 
+export const dynamic = "force-dynamic"
+
 async function EventsList() {
   const events = await eventsAPI.getAllEvents({});
   return (
