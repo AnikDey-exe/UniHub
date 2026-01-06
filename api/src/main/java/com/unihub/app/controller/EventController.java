@@ -52,6 +52,9 @@ public class EventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEvent(eventId)); }
 
+    @GetMapping("/recommended/{eventId}")
+    public ResponseEntity<List<EventDTO>> getRecommendedEvents(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getRecommendedEvents(eventId)); }
+
     @PutMapping("/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 

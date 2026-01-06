@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/send-verification", "/api/users/login", "/oauth2/**", "/login/**").permitAll()  // No auth needed
                         .requestMatchers("/api/events/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/events/recommended/*").permitAll()
                         .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/search").permitAll()
                         .anyRequest()

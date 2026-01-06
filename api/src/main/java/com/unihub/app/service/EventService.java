@@ -409,4 +409,48 @@ public class EventService {
         event.getAttendees().remove(attendee);
         attendee.getEventsAttended().remove(event);
     }
+
+    public List<EventDTO> getRecommendedEvents(Integer eventId) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+        float[] embedding = event.getEmbedding();
+        Float[] embeddingObj = new Float[embedding.length];
+
+        float similarityThreshold = 0.8f;
+        float distanceThreshold = 1 - similarityThreshold;
+
+        StringBuilder sql = new StringBuilder();
+
+        for (int i = 0; i < embedding.length; i++) {
+            embeddingObj[i] = embedding[i];
+        }
+
+        String embeddingLiteral = "[" + Arrays.stream(embeddingObj)
+                .map(f -> Float.toString(f))
+                .collect(Collectors.joining(",")) + "]";
+
+        sql.append("SELECT *, ");
+        sql.append("(e.embedding <=> '").append(embeddingLiteral).append("'::vector) AS distance ");
+        sql.append("FROM events.event e WHERE 1=1 ");
+        sql.append("AND e.id != :eventId ");
+        sql.append("AND (e.embedding <=> '").append(embeddingLiteral).append("'::vector <= ")
+                .append(distanceThreshold)
+                .append(") ");
+        sql.append("ORDER BY ");
+        sql.append("(e.embedding <=> '").append(embeddingLiteral).append("'::vector) ASC ");
+        sql.append("LIMIT :limit");
+
+        Query query = em.createNativeQuery(sql.toString(), Event.class);
+        query.setParameter("limit", 20);
+        query.setParameter("eventId", eventId);
+
+        List<Event> events = query.getResultList();
+
+        List<EventDTO> eventDTOs = new ArrayList<EventDTO>();
+
+        for (Event candidateEvent : events) {
+            eventDTOs.add(dtoMapper.toEventDTO(candidateEvent));
+        }
+
+        return eventDTOs;
+    }
 }

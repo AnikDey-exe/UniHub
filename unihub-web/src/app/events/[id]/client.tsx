@@ -10,6 +10,9 @@ import { useCurrentUser } from "@/context/user-context"
 import { useRSVP } from "@/hooks/use-rsvp"
 import { useUnRSVP } from "@/hooks/use-unrsvp"
 import { useEvent } from "@/hooks/use-event"
+import { useRecommendedEvents } from "@/hooks/use-recommended-events"
+import { EventCard } from "@/components/ui/event-card"
+import { Loading } from "@/components/ui/loading"
 
 interface EventDetailsClientProps {
   event: Event
@@ -21,6 +24,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const { data: eventData } = useEvent(event.id, event)
   const rsvpMutation = useRSVP(event.id)
   const unrsvpMutation = useUnRSVP(event.id)
+  const { data: recommendedEvents, isLoading: isLoadingRecommended } = useRecommendedEvents(event.id)
 
   const attendeesCount = eventData?.attendees?.length || 0
   const university = eventData?.creator 
@@ -132,10 +136,26 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
         </div>
 
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">Based on what you like</h2>
-          <div className="flex items-center justify-center py-12 border border-dashed border-border rounded-lg bg-muted/30">
-            <p className="text-muted-foreground text-lg">Coming soon</p>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Recommended Events</h2>
+          {isLoadingRecommended ? (
+            <div className="flex items-center justify-center py-12">
+              <Loading variant="spinner" size="md" />
+            </div>
+          ) : recommendedEvents && recommendedEvents.length > 0 ? (
+            <div className="overflow-x-auto pb-4">
+              <div className="flex gap-6 min-w-max">
+                {recommendedEvents.map((recommendedEvent) => (
+                  <div key={recommendedEvent.id} className="w-80 flex-shrink-0">
+                    <EventCard event={recommendedEvent} variant="default" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-12 border border-dashed border-border rounded-lg bg-muted/30">
+              <p className="text-muted-foreground text-lg">No recommendations available</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

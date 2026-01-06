@@ -43,7 +43,6 @@ public class CollegeController {
         return ResponseEntity.ok().body(collegeService.getColleges(request));
     }
 
-    // will need to run scraping script in prod
 //    @PostMapping("/scrape")
 //    public ResponseEntity<String> scrapeColleges() {
 //        collegeService.scrapeColleges();

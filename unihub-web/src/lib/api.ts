@@ -168,6 +168,11 @@ export const eventsAPI = {
       method: 'POST',
       body: JSON.stringify(rsvpData),
     }, token),
+  
+  recommendedEvents: (id: number) =>
+    apiFetch<Event[]>(`/api/events/recommended/${id}`, {
+      method: 'GET',
+    })
 };
 
 export const usersAPI = {
