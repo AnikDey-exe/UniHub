@@ -16,4 +16,5 @@ public class AppUserSummaryDTO {
     private String lastName;
     private String about;
     private String profilePicture;
+    private CollegeSummaryDTO college;
 }

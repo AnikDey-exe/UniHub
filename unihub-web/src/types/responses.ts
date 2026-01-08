@@ -26,6 +26,7 @@ export interface UserSummary {
     phoneNumber: string;
     about?: string;
     profilePicture?: string;
+    college?: CollegeSummary;
 }
   
 export interface Event {

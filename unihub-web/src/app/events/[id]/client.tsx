@@ -13,6 +13,7 @@ import { useEvent } from "@/hooks/use-event"
 import { useRecommendedEvents } from "@/hooks/use-recommended-events"
 import { EventCard } from "@/components/ui/event-card"
 import { Loading } from "@/components/ui/loading"
+import { AttendeesList } from "@/components/ui/attendee-card"
 
 interface EventDetailsClientProps {
   event: Event
@@ -34,6 +35,8 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const isRegistered = user && eventData?.attendees?.some(
     attendee => attendee.email === user.email
   )
+
+  const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
   const handleRSVP = () => {
     if (rsvpMutation.isPending || unrsvpMutation.isPending) {
@@ -135,8 +138,15 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           </p>
         </div>
 
+        {isCreator && eventData?.attendees !== undefined && (
+          <div className="mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6">Attendees ({attendeesCount})</h2>
+            <AttendeesList attendees={eventData.attendees} />
+          </div>
+        )}
+
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-6">Recommended Events</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">More Events Like This</h2>
           {isLoadingRecommended ? (
             <div className="flex items-center justify-center py-12">
               <Loading variant="spinner" size="md" />
