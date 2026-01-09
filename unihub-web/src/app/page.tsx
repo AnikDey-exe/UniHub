@@ -106,26 +106,26 @@ export default async function HomePage() {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
-                  <div className="relative text-center">
+                <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
+                  {/* <div className="relative text-center">
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                       <Calendar className="h-4 w-4 text-primary" />
                     </div>
                     <div className="text-4xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent mt-5">10K+</div>
                     <div className="text-sm text-muted-foreground">Active Events</div>
-                  </div>
+                  </div> */}
                   <div className="relative text-center">
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
                       <GraduationCap className="h-4 w-4 text-accent" />
                     </div>
-                    <div className="text-4xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent mt-5">500+</div>
+                    <div className="text-4xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent mt-7">6000+</div>
                     <div className="text-sm text-muted-foreground">Colleges</div>
                   </div>
                   <div className="relative text-center">
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                       <Users className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="text-4xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent mt-5">50K+</div>
+                    <div className="text-4xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent mt-7">50K+</div>
                     <div className="text-sm text-muted-foreground">Students</div>
                   </div>
                 </div>
@@ -144,11 +144,11 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                 {[
                   { icon: Calendar, title: "Discover Events", desc: "Browse thousands of events on your campus", color: "from-primary/25 to-primary/10" },
-                  { icon: Users, title: "Connect with Peers", desc: "Join communities and meet like-minded students", color: "from-accent/25 to-accent/10" },
-                  { icon: Zap, title: "Stay Updated", desc: "Get notified about events you care about", color: "from-primary/25 to-accent/25" },
+                  // { icon: Users, title: "Connect with Peers", desc: "Join communities and meet like-minded students", color: "from-accent/25 to-accent/10" },
+                  { icon: Zap, title: "Stay Organized", desc: "Easily track the events you care about", color: "from-primary/25 to-accent/25" },
                   { icon: TrendingUp, title: "Track Trends", desc: "See what's popular and trending on campus", color: "from-accent/25 to-primary/25" },
                 ].map((feature, idx) => (
                   <Card key={idx} className="p-6 border-border/50 bg-card/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-105 relative overflow-hidden group">
@@ -245,14 +245,14 @@ export default async function HomePage() {
               <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                 <div className="text-center p-8 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50">
                   <div className="text-5xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">10K+</div>
-                  <div className="text-sm text-muted-foreground font-medium">Events hosted per month</div>
+                  <div className="text-sm text-muted-foreground font-medium">Events supported by UniHub</div>
                 </div>
                 <div className="text-center p-8 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50">
-                  <div className="text-5xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">95%</div>
+                  <div className="text-5xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">75%</div>
                   <div className="text-sm text-muted-foreground font-medium">Events discovered by AI</div>
                 </div>
                 <div className="text-center p-8 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50">
-                  <div className="text-5xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">4.9/5</div>
+                  <div className="text-5xl font-bold mb-2 bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">4.7/5</div>
                   <div className="text-sm text-muted-foreground font-medium">Average user rating</div>
                 </div>
               </div>

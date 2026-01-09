@@ -59,8 +59,8 @@ export function EventsClient({ initialEvents }: EventsClientProps) {
   return (
     <div className="min-h-screen bg-background">
       <section>
-        <div className="container px-4 md:px-6 py-4 mt-4">
-          <div className="flex items-center justify-between">
+        <div className="container px-4 md:px-6 py-4 mt-0">
+          <div className="flex items-center justify-between mb-6 mt-4">
             <h1 className="text-3xl font-bold text-foreground">Events</h1>
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

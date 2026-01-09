@@ -299,9 +299,10 @@ export default function SettingsClient() {
                   <Label htmlFor="college">College</Label>
                   <Input
                     id="college"
-                    placeholder="Stanford University"
+                    placeholder="No college assigned"
+                    value={user?.college?.name || ""}
                     disabled
-                    className="bg-muted"
+                    className="bg-muted cursor-not-allowed"
                   />
                 </div>
 

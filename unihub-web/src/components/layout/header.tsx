@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Calendar, Menu, User, Plus } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { APP_NAME } from "@/lib/constants";
 import { useCurrentUser } from "@/context/user-context";
 
@@ -27,9 +28,13 @@ export function Header() {
           {/* Left side - Logo */}
           <div className="flex justify-start">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <Calendar className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <Image
+                src="/logo-no-bg.png"
+                alt={`${APP_NAME} logo`}
+                width={90}
+                height={90}
+                className="h-9 w-9 object-cover"
+              />
               <span className="text-xl font-bold">{APP_NAME}</span>
             </Link>
           </div>
@@ -40,7 +45,7 @@ export function Header() {
               href="/events"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              Browse Events
+              Events
             </Link>
             <Link
               href="/colleges"
@@ -99,11 +104,6 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link href="/my-events" className="w-full">
-                      My Events
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
                     <Link href="/settings" className="w-full">
                       Settings
                     </Link>
@@ -126,9 +126,13 @@ export function Header() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Calendar className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <Image
+                src="/logo-no-bg.png"
+                alt={`${APP_NAME} logo`}
+                width={32}
+                height={32}
+                className="h-8 w-8 object-cover"
+              />
               <span className="text-lg font-bold">{APP_NAME}</span>
             </Link>
 
@@ -175,11 +179,6 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/my-events" className="w-full">
-                        My Events
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
                       <Link href="/settings" className="w-full">
                         Settings
                       </Link>
@@ -212,7 +211,7 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Link href="/events" className="w-full">
-                      Browse Events
+                      Events
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
@@ -220,11 +219,11 @@ export function Header() {
                       Colleges
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <Link href="/about" className="w-full">
                       About
                     </Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

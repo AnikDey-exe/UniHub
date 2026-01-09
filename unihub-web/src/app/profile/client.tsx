@@ -82,7 +82,7 @@ export function ProfileClient() {
                 {user.about ? (
                   <p className="text-sm md:text-base text-foreground mb-4">{user.about}</p>
                 ) : (
-                  <p className="text-sm md:text-base text-muted-foreground mb-4">[Bio here]</p>
+                  null
                 )}
                 <div className="flex flex-col sm:flex-row gap-4 text-sm md:text-base text-foreground">
                   <span>{eventsAttendedCount} events attended</span>
