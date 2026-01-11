@@ -5,6 +5,7 @@ import com.unihub.app.model.AppUser;
 import com.unihub.app.model.College;
 import com.unihub.app.model.Event;
 
+import com.unihub.app.model.Registration;
 import org.hibernate.sql.Update;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,6 +29,10 @@ public interface DTOMapper {
 
     @Mapping(target = "students", source = "students")
     CollegeDTO toCollegeDTO(College college);
+
+    @Mapping(target = "attendee", source = "attendee")
+    @Mapping(target = "event", source = "event")
+    RegistrationDTO toRegistrationDTO(Registration registration);
 
     // Smaller objects
     AppUserSummaryDTO toAppUserSummaryDTO(AppUser appUser);

@@ -10,8 +10,11 @@ import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
 import com.unihub.app.model.AppUser;
 import com.unihub.app.model.Event;
+import com.unihub.app.model.Registration;
+import com.unihub.app.model.RegistrationStatus;
 import com.unihub.app.repository.AppUserRepo;
 import com.unihub.app.repository.EventRepo;
+import com.unihub.app.repository.RegistrationRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,8 @@ public class EventService {
     private EventRepo eventRepo;
     @Autowired
     private AppUserRepo appUserRepo;
+    @Autowired
+    private RegistrationRepo registrationRepo;
     @Autowired
     private DTOMapper dtoMapper;
     @Autowired
@@ -334,80 +339,87 @@ public class EventService {
         return eventDTO;
     }
 
+    // change to registration
     @Transactional
-    public void rsvpEvent(Integer eventId, String userEmail) {
+    public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         AppUser attendee = appUserRepo.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (event.getAttendees().contains(attendee)) {
-            throw new UserAlreadyRegisteredException("User is already registered for event.");
-        }
-        if (event.getNumAttendees() >= event.getCapacity()) {
-            throw new CapacityLimitReachedException("Event is at full capacity.");
-        }
+        if (event.getNumAttendees() >= event.getCapacity()) throw new CapacityLimitReachedException("Event is at full capacity");
+        if (event.getNumAttendees() + tickets > event.getCapacity()) throw new CapacityLimitReachedException("Event does not have enough capacity for the number of tickets you requested");
+
+        boolean alreadyRegistered = em.createQuery("""
+            SELECT COUNT(r)
+            FROM Registration r
+            WHERE r.event = :event AND r.attendee = :attendee
+        """, Long.class)
+                .setParameter("event", event)
+                .setParameter("attendee", attendee)
+                .getSingleResult() > 0;
+
+        if (alreadyRegistered) throw new UserAlreadyRegisteredException("User is already registered for event");
+
+        Registration registration = new Registration();
+        registration.setEvent(event);
+        registration.setAttendee(attendee);
+        registration.setDisplayName(displayName != null ? displayName : attendee.getFirstName() + " " + attendee.getLastName());
+        registration.setTickets(tickets);
+        registration.setStatus(status);
 
         em.detach(event);
+        registrationRepo.save(registration);
 
-        em.createNativeQuery("""
-            UPDATE events.event
-            SET num_attendees = num_attendees + 1
-            WHERE id = :eventId
-        """)
-                .setParameter("eventId", eventId)
-                .executeUpdate();
+        if (status == RegistrationStatus.APPROVED) {
+            em.createNativeQuery("""
+                   UPDATE events.event
+                   SET num_attendees = num_attendees + :tickets
+                   WHERE id = :eventId
+            """)
+                    .setParameter("tickets", tickets)
+                    .setParameter("eventId", eventId)
+                    .executeUpdate();
+            event.setNumAttendees(event.getNumAttendees() + tickets);
+        }
 
+//        event.getAttendees().add(registration);
+//        attendee.getEventsAttended().add(registration);
 
-        em.createNativeQuery("""
-            INSERT INTO events.attendee (event_id, attendee_user_id)
-            VALUES (:eventId, :userId)
-            ON CONFLICT DO NOTHING
-        """)
-                .setParameter("eventId", eventId)
-                .setParameter("userId", attendee.getId())
-                .executeUpdate();
-
-        event.setNumAttendees(event.getNumAttendees() + 1);
-        event.getAttendees().add(attendee);
-        attendee.getEventsAttended().add(event);
-
-        EmailDTO email = new EmailDTO(userEmail, "You have been registered for "+event.getName()+"!", "Registration Confirmation");
+        EmailDTO email = new EmailDTO(userEmail, "You have been registered for "+event.getName()+"! Check your registration status in your profile to see if it got approved.", "Registration Confirmation");
         emailService.sendSimpleEmailAsync(email);
     }
 
+    // change to registration
     @Transactional
     public void unrsvpEvent(Integer eventId, String userEmail) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         AppUser attendee = appUserRepo.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
+        Registration registration = registrationRepo
+                .findByEventAndAttendee(event, attendee)
+                .orElseThrow(() -> new UserNotRegisteredException("User is not registered"));
 
-        if (!event.getAttendees().contains(attendee)) {
-            throw new UserNotRegisteredException("User is not registered for event.");
+        if (registration.getStatus() == RegistrationStatus.APPROVED) {
+            em.detach(event);
+            em.createNativeQuery("""
+                   UPDATE events.event
+                   SET num_attendees = num_attendees - :tickets
+                   WHERE id = :eventId
+            """)
+                    .setParameter("tickets", registration.getTickets())
+                    .setParameter("eventId", eventId)
+                    .executeUpdate();
+            event.setNumAttendees(event.getNumAttendees() - registration.getTickets());
         }
 
-        em.detach(event);
+        registrationRepo.delete(registration);
 
-        em.createNativeQuery("""
-            DELETE FROM events.attendee
-            WHERE event_id = :eventId AND attendee_user_id = :userId
-        """)
-                .setParameter("eventId", eventId)
-                .setParameter("userId", attendee.getId())
-                .executeUpdate();
+//        em.refresh(event);
 
-        em.createNativeQuery("""
-            UPDATE events.event
-            SET num_attendees = num_attendees - 1
-            WHERE id = :eventId
-        """)
-                .setParameter("eventId", eventId)
-                .executeUpdate();
-
-        event.setNumAttendees(event.getNumAttendees() - 1);
-        event.getAttendees().remove(attendee);
-        attendee.getEventsAttended().remove(event);
+//        event.getAttendees().remove(registration);
+//        attendee.getEventsAttended().remove(registration);
     }
 
     public List<EventDTO> getRecommendedEvents(Integer eventId) {

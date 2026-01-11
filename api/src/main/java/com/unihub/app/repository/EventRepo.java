@@ -2,6 +2,7 @@ package com.unihub.app.repository;
 
 import com.unihub.app.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -47,11 +48,3 @@ public interface EventRepo extends JpaRepository<Event, Integer> {
 ////            @Param("cursorValue") Object cursorValue
 //    );
 }
-
-//AND (
-//                    (:cursorValue IS NULL)
-//OR (
-//                      (:sortBy = 'popularity' AND e.num_attendees < :cursorValue)
-//OR (:sortBy = 'recency' AND e.event_start_date_utc < :cursorValue)
-//                    )
-//                            )

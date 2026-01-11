@@ -1,0 +1,8 @@
+databaseChangeLog:
+- changeSet:
+    id: 1768003695137-1
+    author: anikdey (generated)
+    changes:
+    - dropTable:
+        tableName: attendee
+

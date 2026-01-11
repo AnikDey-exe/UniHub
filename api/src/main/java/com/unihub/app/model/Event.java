@@ -62,15 +62,16 @@ public class Event {
     @JoinColumn(name = "creator_user_id")
     private AppUser creator;
 
-    @ManyToMany
-    @JoinTable(
-            name = "attendee",
-            schema = "events",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
-    )
+//    @ManyToMany
+//    @JoinTable(
+//            name = "attendee",
+//            schema = "events",
+//            joinColumns = @JoinColumn(name = "event_id"),
+//            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
+//    )
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     @ToString.Exclude
-    private Set<AppUser> attendees;
+    private Set<Registration> attendees;
 
     @Override
     public final boolean equals(Object o) {

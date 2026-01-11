@@ -48,9 +48,10 @@ public class AppUser implements UserDetails {
     @ToString.Exclude
     List<Event> eventsCreated;
 
-    @ManyToMany(mappedBy = "attendees")
+//    @ManyToMany(mappedBy = "attendees")
+    @OneToMany(mappedBy = "attendee", cascade = CascadeType.ALL)
     @ToString.Exclude
-    List<Event> eventsAttended;
+    List<Registration> eventsAttended;
 
     @ManyToOne
     @JoinColumn(name = "college")

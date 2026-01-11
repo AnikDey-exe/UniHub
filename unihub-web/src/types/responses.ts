@@ -13,7 +13,7 @@ export interface User {
     about?: string;
     profilePicture?: string;
     eventsCreated?: EventSummary[];
-    eventsAttended?: EventSummary[];
+    eventsAttended?: Registration[];
     college?: CollegeSummary;
 }
 
@@ -42,7 +42,7 @@ export interface Event {
     eventEndDateUtc: string;
     eventTimezone: string;
     creator?: UserSummary;
-    attendees?: UserSummary[];
+    attendees?: Registration[];
 }
 
 export interface EventSearchResponse {
@@ -85,4 +85,20 @@ export interface CollegeSearchResponse {
     colleges: College[];
     lastNameASC: string;
     hasNext: boolean;
+}
+
+export interface Registration {
+    id: number;
+    displayName: string;
+    tickets: number;
+    status: RegistrationStatus;
+    event: EventSummary;
+    attendee: UserSummary;
+}
+
+export enum RegistrationStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED',
 }
