@@ -1,4 +1,5 @@
 import { EventType } from './event-types';
+import { RegistrationStatus } from './responses';
 
 export interface LoginRequest {
     email: string;
@@ -69,4 +70,7 @@ export interface CollegeSearchRequest {
 export interface RSVPRequest {
     eventId: number;
     userEmail: string;
+    displayName?: string;
+    tickets?: number;
+    status?: RegistrationStatus;
 }

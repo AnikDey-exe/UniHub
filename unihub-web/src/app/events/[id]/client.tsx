@@ -1,10 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Users } from "lucide-react"
-import { Event } from "@/types/responses"
+import { Event, RegistrationStatus } from "@/types/responses"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { useCurrentUser } from "@/context/user-context"
 import { useRSVP } from "@/hooks/use-rsvp"
@@ -14,6 +15,7 @@ import { useRecommendedEvents } from "@/hooks/use-recommended-events"
 import { EventCard } from "@/components/ui/event-card"
 import { Loading } from "@/components/ui/loading"
 import { AttendeesList } from "@/components/ui/attendee-card"
+import { RegistrationModal } from "./components/registration-modal"
 
 interface EventDetailsClientProps {
   event: Event
@@ -26,23 +28,23 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const rsvpMutation = useRSVP(event.id)
   const unrsvpMutation = useUnRSVP(event.id)
   const { data: recommendedEvents, isLoading: isLoadingRecommended } = useRecommendedEvents(event.id)
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
 
-  const attendeesCount = eventData?.attendees?.length || 0
+  // Calculate total attendees count from registrations (sum of tickets)
+  const attendeesCount = eventData?.attendees?.reduce((sum, registration) => sum + registration.tickets, 0) || 0
+  
   const university = eventData?.creator 
     ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
     : 'University'
 
+  // Check if user is registered by looking at attendee.email in Registration objects
   const isRegistered = user && eventData?.attendees?.some(
-    attendee => attendee.email === user.email
+    registration => registration.attendee.email === user.email
   )
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
-  const handleRSVP = () => {
-    if (rsvpMutation.isPending || unrsvpMutation.isPending) {
-      return
-    }
-  
+  const handleRegister = (displayName: string, tickets: number) => {
     if (!user) {
       router.push('/login')
       return
@@ -54,22 +56,66 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
       return
     }
 
+    // Ensure tickets is a valid number
+    const ticketsNumber = Number(tickets) || 1
+    if (ticketsNumber < 1) {
+      return
+    }
+
+    rsvpMutation.mutate(
+      {
+        rsvpData: {
+          eventId: event.id,
+          userEmail: user.email,
+          displayName: displayName.trim(),
+          tickets: ticketsNumber,
+          status: RegistrationStatus.APPROVED,
+        },
+        token,
+      },
+      {
+        onSuccess: () => {
+          setIsRegistrationModalOpen(false)
+        },
+      }
+    )
+  }
+
+  const handleUnregister = () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/login')
+      return
+    }
+
+    unrsvpMutation.mutate({
+      rsvpData: {
+        eventId: event.id,
+        userEmail: user.email,
+      },
+      token,
+    })
+  }
+
+  const handleRSVP = () => {
+    if (rsvpMutation.isPending || unrsvpMutation.isPending) {
+      return
+    }
+  
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
     if (isRegistered) {
-      unrsvpMutation.mutate({
-        rsvpData: {
-          eventId: event.id,
-          userEmail: user.email,
-        },
-        token,
-      })
+      handleUnregister()
     } else {
-      rsvpMutation.mutate({
-        rsvpData: {
-          eventId: event.id,
-          userEmail: user.email,
-        },
-        token,
-      })
+      setIsRegistrationModalOpen(true)
     }
   }
   
@@ -168,6 +214,14 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           )}
         </div>
       </div>
+
+      <RegistrationModal
+        open={isRegistrationModalOpen}
+        onOpenChange={setIsRegistrationModalOpen}
+        user={user}
+        onSubmit={handleRegister}
+        isPending={rsvpMutation.isPending}
+      />
     </div>
   )
 }
