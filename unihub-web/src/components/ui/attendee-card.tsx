@@ -2,19 +2,23 @@
 
 import { useState, useMemo } from "react"
 import { Search } from "lucide-react"
-import { UserSummary } from "@/types/responses"
+import { UserSummary, Registration } from "@/types/responses"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/utils/cn"
 
 interface AttendeeCardProps {
   attendee: UserSummary
+  displayName?: string
+  tickets?: number
   className?: string
 }
 
-export function AttendeeCard({ attendee, className }: AttendeeCardProps) {
+export function AttendeeCard({ attendee, displayName, tickets, className }: AttendeeCardProps) {
   const fullName = `${attendee.firstName} ${attendee.lastName}`
   const initials = `${attendee.firstName[0]}${attendee.lastName[0]}`.toUpperCase()
+  const nameToDisplay = displayName || fullName
 
   return (
     <Card className={cn("p-4", className)}>
@@ -23,7 +27,7 @@ export function AttendeeCard({ attendee, className }: AttendeeCardProps) {
           {attendee.profilePicture ? (
             <img 
               src={attendee.profilePicture} 
-              alt={fullName}
+              alt={nameToDisplay}
               className="w-full h-full rounded-full object-cover"
             />
           ) : (
@@ -33,9 +37,16 @@ export function AttendeeCard({ attendee, className }: AttendeeCardProps) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base mb-1 text-foreground line-clamp-1">
-            {fullName}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-base text-foreground line-clamp-1">
+              {nameToDisplay}
+            </h3>
+            {tickets !== undefined && tickets > 1 && (
+              <Badge variant="secondary" className="text-xs">
+                {tickets} tickets
+              </Badge>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground line-clamp-1">
             {attendee.email}
           </p>
@@ -51,7 +62,7 @@ export function AttendeeCard({ attendee, className }: AttendeeCardProps) {
 }
 
 interface AttendeesListProps {
-  attendees: UserSummary[]
+  attendees: Registration[]
   className?: string
 }
 
@@ -64,10 +75,11 @@ export function AttendeesList({ attendees, className }: AttendeesListProps) {
     }
 
     const query = searchQuery.toLowerCase().trim()
-    return attendees.filter((attendee) => {
-      const fullName = `${attendee.firstName} ${attendee.lastName}`.toLowerCase()
-      const email = attendee.email.toLowerCase()
-      return fullName.includes(query) || email.includes(query)
+    return attendees.filter((registration) => {
+      const displayName = registration.displayName.toLowerCase()
+      const fullName = `${registration.attendee.firstName} ${registration.attendee.lastName}`.toLowerCase()
+      const email = registration.attendee.email.toLowerCase()
+      return displayName.includes(query) || fullName.includes(query) || email.includes(query)
     })
   }, [attendees, searchQuery])
 
@@ -97,8 +109,13 @@ export function AttendeesList({ attendees, className }: AttendeesListProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAttendees.map((attendee) => (
-            <AttendeeCard key={attendee.id} attendee={attendee} />
+          {filteredAttendees.map((registration) => (
+            <AttendeeCard
+              key={registration.id}
+              attendee={registration.attendee}
+              displayName={registration.displayName}
+              tickets={registration.tickets}
+            />
           ))}
         </div>
       )}

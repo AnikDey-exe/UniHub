@@ -127,6 +127,9 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sora), system-ui, -apple-system, sans-serif;
   }
+  p, span, div, a, li, td, th, label, button, input, textarea, select {
+    font-family: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
+  }
 }
 
 @layer components {

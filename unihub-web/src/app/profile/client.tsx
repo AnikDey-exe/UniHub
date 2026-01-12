@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EventCard } from "@/components/ui/event-card"
 import { EventsCalendar } from "@/components/ui/events-calendar"
 import { Button } from "@/components/ui/button"
-import { EventSummary, Event } from "@/types/responses"
+import { EventSummary, Event, Registration } from "@/types/responses"
 import { PageLoading } from "@/components/ui/loading"
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
@@ -33,8 +33,13 @@ export function ProfileClient() {
     return null
   }
 
-  const eventsAttended = user.eventsAttended || []
+  const registrations = user.eventsAttended || []
+  // Extract unique events from registrations (a user might have multiple registrations for the same event)
+  const eventsAttended: EventSummary[] = Array.from(
+    new Map(registrations.map(reg => [reg.event.id, reg.event])).values()
+  )
   const eventsCreated = user.eventsCreated || []
+  // Count unique events attended (not total registrations)
   const eventsAttendedCount = eventsAttended.length
   const eventsCreatedCount = eventsCreated.length
 

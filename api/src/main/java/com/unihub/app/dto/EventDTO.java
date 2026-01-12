@@ -23,6 +23,6 @@ public class EventDTO {
     private Instant eventEndDateUtc;
     private String eventTimezone;
     private AppUserSummaryDTO creator;
-    private Set<AppUserSummaryDTO> attendees;
+    private Set<RegistrationDTO> attendees;
 }
 

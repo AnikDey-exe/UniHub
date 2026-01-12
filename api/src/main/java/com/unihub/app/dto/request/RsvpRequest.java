@@ -1,5 +1,6 @@
 package com.unihub.app.dto.request;
 
+import com.unihub.app.model.RegistrationStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -10,4 +11,7 @@ import lombok.AllArgsConstructor;
 public class RsvpRequest {
     private Integer eventId;
     private String userEmail;
+    private String displayName;
+    private Integer tickets = 1;
+    private RegistrationStatus status;
 }

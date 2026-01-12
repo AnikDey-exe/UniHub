@@ -63,12 +63,14 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.saveEvent(event, image));
     }
 
+    // change to registration
     @PostMapping("/rsvp")
     public ResponseEntity<Void> rsvpEvent(@RequestBody RsvpRequest rsvpBody) {
-        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail());
+        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail(), rsvpBody.getDisplayName(), rsvpBody.getTickets(), rsvpBody.getStatus());
         return ResponseEntity.ok().build();
     }
 
+    // change to registration
     @PostMapping("/unrsvp")
     public ResponseEntity<Void> unrsvpEvent(@RequestBody RsvpRequest rsvpBody) {
         eventService.unrsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail());
