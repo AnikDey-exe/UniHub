@@ -1,8 +1,8 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users } from "lucide-react"
-import { Event } from "@/types/responses"
+import { Calendar, MapPin, Users, Clock, CheckCircle2, XCircle, Ban } from "lucide-react"
+import { Event, RegistrationStatus } from "@/types/responses"
 import { cn } from "@/utils/cn"
 import { formatEventDate } from "@/utils/formatEventDate"
 import Link from "next/link"
@@ -11,9 +11,54 @@ interface EventCardProps {
   event: Event
   variant?: 'default' | 'compact' | 'figma'
   className?: string
+  status?: RegistrationStatus
 }
 
-export function EventCard({ event, variant = 'default', className }: EventCardProps) {
+export function EventCard({ event, variant = 'default', className, status }: EventCardProps) {
+  const getStatusIcon = () => {
+    switch (status) {
+      case RegistrationStatus.PENDING:
+        return <Clock className="h-4 w-4" />
+      case RegistrationStatus.APPROVED:
+        return <CheckCircle2 className="h-4 w-4" />
+      case RegistrationStatus.REJECTED:
+        return <XCircle className="h-4 w-4" />
+      case RegistrationStatus.CANCELLED:
+        return <Ban className="h-4 w-4" />
+      default:
+        return null
+    }
+  }
+
+  const getStatusText = () => {
+    switch (status) {
+      case RegistrationStatus.PENDING:
+        return 'Pending'
+      case RegistrationStatus.APPROVED:
+        return 'Approved'
+      case RegistrationStatus.REJECTED:
+        return 'Rejected'
+      case RegistrationStatus.CANCELLED:
+        return 'Cancelled'
+      default:
+        return ''
+    }
+  }
+
+  const getStatusColor = () => {
+    switch (status) {
+      case RegistrationStatus.PENDING:
+        return 'text-yellow-600'
+      case RegistrationStatus.APPROVED:
+        return 'text-green-600'
+      case RegistrationStatus.REJECTED:
+        return 'text-red-600'
+      case RegistrationStatus.CANCELLED:
+        return 'text-gray-600'
+      default:
+        return 'text-muted-foreground'
+    }
+  }
   if (variant === 'figma') {
     return (
       <Link href={`/events/${event.id}`}>
@@ -131,6 +176,12 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
               <Users className="h-4 w-4" />
               <span>{event.numAttendees|| 0} attending</span>
             </div>
+            {status && (
+              <div className={cn("flex items-center gap-2 text-sm font-medium", getStatusColor())}>
+                {getStatusIcon()}
+                <span>{getStatusText()}</span>
+              </div>
+            )}
           </CardContent>
 
           <CardFooter className="px-0 pt-0 mt-auto">

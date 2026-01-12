@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EventCard } from "@/components/ui/event-card"
 import { EventsCalendar } from "@/components/ui/events-calendar"
 import { Button } from "@/components/ui/button"
-import { EventSummary, Event, Registration } from "@/types/responses"
+import { EventSummary, Event, Registration, RegistrationStatus } from "@/types/responses"
 import { PageLoading } from "@/components/ui/loading"
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
@@ -35,6 +35,16 @@ export function ProfileClient() {
 
   const registrations = user.eventsAttended || []
   // Extract unique events from registrations (a user might have multiple registrations for the same event)
+  // Create a map of event ID to registration status (prioritize APPROVED if available)
+  const eventStatusMap = new Map<number, RegistrationStatus>()
+  registrations.forEach(reg => {
+    const existingStatus = eventStatusMap.get(reg.event.id)
+    // Prioritize APPROVED status, otherwise keep the first one
+    if (!existingStatus || reg.status === RegistrationStatus.APPROVED) {
+      eventStatusMap.set(reg.event.id, reg.status)
+    }
+  })
+  
   const eventsAttended: EventSummary[] = Array.from(
     new Map(registrations.map(reg => [reg.event.id, reg.event])).values()
   )
@@ -159,7 +169,12 @@ export function ProfileClient() {
               viewMode === "list" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {eventsAttended.map((eventSummary: EventSummary) => (
-                    <EventCard key={eventSummary.id} event={convertEventSummaryToEvent(eventSummary)} variant="default" />
+                    <EventCard 
+                      key={eventSummary.id} 
+                      event={convertEventSummaryToEvent(eventSummary)} 
+                      variant="default" 
+                      status={eventStatusMap.get(eventSummary.id)}
+                    />
                   ))}
                 </div>
               ) : (

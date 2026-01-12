@@ -4,9 +4,10 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Users } from "lucide-react"
+import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck } from "lucide-react"
 import { Event, RegistrationStatus } from "@/types/responses"
 import { formatAttendees } from "@/utils/formatAttendees"
+import { formatEventDate } from "@/utils/formatEventDate"
 import { useCurrentUser } from "@/context/user-context"
 import { useRSVP } from "@/hooks/use-rsvp"
 import { useUnRSVP } from "@/hooks/use-unrsvp"
@@ -37,10 +38,11 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
     : 'University'
 
-  // Check if user is registered by looking at attendee.email in Registration objects
-  const isRegistered = user && eventData?.attendees?.some(
+  // Find user's registration to get display name
+  const userRegistration = user && eventData?.attendees?.find(
     registration => registration.attendee.email === user.email
   )
+  const isRegistered = !!userRegistration
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
@@ -118,22 +120,68 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
       setIsRegistrationModalOpen(true)
     }
   }
+
+  const getStatusIcon = () => {
+    if (!userRegistration) return null
+    switch (userRegistration.status) {
+      case RegistrationStatus.PENDING:
+        return <Clock className="h-4 w-4" />
+      case RegistrationStatus.APPROVED:
+        return <CheckCircle2 className="h-4 w-4" />
+      case RegistrationStatus.REJECTED:
+        return <XCircle className="h-4 w-4" />
+      case RegistrationStatus.CANCELLED:
+        return <Ban className="h-4 w-4" />
+      default:
+        return null
+    }
+  }
+
+  const getStatusText = () => {
+    if (!userRegistration) return ''
+    switch (userRegistration.status) {
+      case RegistrationStatus.PENDING:
+        return 'Pending'
+      case RegistrationStatus.APPROVED:
+        return 'Approved'
+      case RegistrationStatus.REJECTED:
+        return 'Rejected'
+      case RegistrationStatus.CANCELLED:
+        return 'Cancelled'
+      default:
+        return ''
+    }
+  }
+
+  const getStatusColor = () => {
+    if (!userRegistration) return 'text-muted-foreground'
+    switch (userRegistration.status) {
+      case RegistrationStatus.PENDING:
+        return 'text-yellow-600'
+      case RegistrationStatus.APPROVED:
+        return 'text-green-600'
+      case RegistrationStatus.REJECTED:
+        return 'text-red-600'
+      case RegistrationStatus.CANCELLED:
+        return 'text-gray-600'
+      default:
+        return 'text-muted-foreground'
+    }
+  }
   
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-12 mb-12">
-          <div className="w-full bg-muted rounded-lg overflow-hidden">
+          <div className="flex flex-col justify-center h-full w-full bg-muted rounded-lg overflow-hidden aspect-[4/3]">
             {eventData?.image ? (
-              <div className="w-full aspect-[4/3] bg-muted overflow-hidden">
-                <img 
-                  src={eventData.image} 
-                  alt={eventData.name || "Event image"} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <img 
+                src={eventData.image} 
+                alt={eventData.name || "Event image"} 
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center">
+              <div className="w-full h-full flex items-center justify-center">
                 <span className="text-muted-foreground text-sm">Event Image</span>
               </div>
             )}
@@ -149,6 +197,18 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
             </div>
 
             <div className="space-y-3">
+              {eventData?.eventStartDateUtc && eventData?.eventEndDateUtc && (
+                <div className="flex items-start gap-3 text-foreground">
+                  <Calendar className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col">
+                    <span className="text-base font-medium">Date & Time</span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatEventDate(eventData.eventStartDateUtc, eventData.eventEndDateUtc, eventData.eventTimezone)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-3 text-foreground">
                 <MapPin className="h-5 w-5 flex-shrink-0" />
                 <span className="text-base">{eventData?.location}</span>
@@ -156,24 +216,56 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
               
               <div className="flex items-center gap-3 text-foreground">
                 <Users className="h-5 w-5 flex-shrink-0" />
-                <span className="text-base">{formatAttendees(attendeesCount)}</span>
+                <div className="flex flex-col">
+                  <span className="text-base">{formatAttendees(attendeesCount)}</span>
+                  {eventData && eventData.capacity > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      {eventData.capacity - attendeesCount} spots remaining
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {eventData && eventData.capacity > 0 && (
+                <div className="flex items-center gap-3 text-foreground">
+                  <UserCheck className="h-5 w-5 flex-shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-base">Capacity</span>
+                    <span className="text-sm text-muted-foreground">
+                      {eventData.capacity} total spots
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <Button 
-              size="lg" 
-              className="w-full md:w-auto rounded-md"
-              onClick={handleRSVP}
-              disabled={rsvpMutation.isPending || unrsvpMutation.isPending}
-            >
-              {rsvpMutation.isPending 
-                ? 'Registering...' 
-                : unrsvpMutation.isPending
-                  ? 'Unregistering...'
-                  : isRegistered 
-                    ? 'Unregister' 
-                    : 'Register'}
-            </Button>
+            <div className="space-y-2">
+              <Button 
+                size="lg" 
+                className="w-full md:w-auto rounded-md"
+                onClick={handleRSVP}
+                disabled={rsvpMutation.isPending || unrsvpMutation.isPending}
+              >
+                {rsvpMutation.isPending 
+                  ? 'Registering...' 
+                  : unrsvpMutation.isPending
+                    ? 'Unregistering...'
+                    : isRegistered 
+                      ? 'Unregister' 
+                      : 'Register'}
+              </Button>
+              {isRegistered && userRegistration && (
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    Registered as {userRegistration.displayName}
+                  </p>
+                  <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor()}`}>
+                    {getStatusIcon()}
+                    <span>{getStatusText()}</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
