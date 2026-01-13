@@ -103,9 +103,6 @@ export function RegistrationModal({
             required
             disabled={isPending}
           />
-          <p className="text-sm text-muted-foreground">
-            How many tickets would you like?
-          </p>
         </div>
 
         <div className="flex justify-end gap-3">
