@@ -253,13 +253,6 @@ public class EventService {
 //            user.getEventsCreated().add(event);
 //        }
 
-        // make the questions
-        ObjectMapper mapper = new ObjectMapper();
-        List<QuestionRequest> questions = mapper.readValue(
-                eventRequest.getQuestionsJson(),
-                new TypeReference<List<QuestionRequest>>() {}
-        );
-
         String thumbnail = "";
 
         if (image != null) {
@@ -360,23 +353,33 @@ public class EventService {
 // Now fetch it again to get a truly fresh managed entity
         Event managedEvent = em.find(Event.class, generatedId);
 
-        List<Question> questionEntities = questions.stream()
-                .map(qr -> {
-                    Question q = new Question();
-                    q.setQuestion(qr.getQuestion());
-                    q.setType(qr.getType());
-                    q.setChoices(qr.getChoices().toArray(new String[0]));
-                    q.setRequired(qr.isRequired());
-                    q.setEvent(managedEvent); // important
-                    return q;
-                })
-                .toList();
+        if (eventRequest.getQuestionsJson() != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            List<QuestionRequest> questions = mapper.readValue(
+                    eventRequest.getQuestionsJson(),
+                    new TypeReference<List<QuestionRequest>>() {
+                    }
+            );
 
-        for (Question q : questionEntities) {
-            questionRepo.save(q);
+            List<Question> questionEntities = questions.stream()
+                    .map(qr -> {
+                        Question q = new Question();
+                        q.setQuestion(qr.getQuestion());
+                        q.setType(qr.getType());
+                        q.setChoices(qr.getChoices().toArray(new String[0]));
+                        q.setRequired(qr.isRequired());
+                        q.setEvent(managedEvent); // important
+                        return q;
+                    })
+                    .toList();
+
+            for (Question q : questionEntities) {
+                questionRepo.save(q);
+            }
+
+            questionRepo.saveAll(questionEntities);
         }
 
-        questionRepo.saveAll(questionEntities);
         EventDTO eventDTO = dtoMapper.toEventDTO(managedEvent);
         log.info("Event with id: {} saved successfully", managedEvent.getName());
         return eventDTO;
