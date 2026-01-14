@@ -22,4 +22,7 @@ public class EventSummaryDTO {
     private Instant eventStartDateUtc;
     private Instant eventEndDateUtc;
     private String eventTimezone;
+    private int maxTickets;
+    private boolean required;
+    private String approvalSuccessMessage;
 }

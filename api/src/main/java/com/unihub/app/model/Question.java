@@ -1,7 +1,9 @@
 package com.unihub.app.model;
 
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.List;
@@ -14,33 +16,31 @@ import java.util.Objects;
 @ToString
 @Entity
 
-@Table(name = "registration", schema = "events", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"attendee_user_id", "event_id"})
-})
-public class Registration {
+@Table(name = "question", schema = "events")
+public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "display_name")
-    private String displayName;
-
     @Column(nullable = false)
-    private Integer tickets = 1;
+    private String question;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RegistrationStatus status = RegistrationStatus.APPROVED;
+    private QuestionType type;
 
-    @ManyToOne
-    @JoinColumn(name = "attendee_user_id", nullable = false)
-    private AppUser attendee;
+    @Type(StringArrayType.class)
+    @Column(name = "choices", columnDefinition = "text[]", nullable = false)
+    private String[] choices;
+
+    @Column(nullable = false)
+    private boolean required;
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @OneToMany(mappedBy = "registration", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Answer> answers;
 
@@ -51,8 +51,8 @@ public class Registration {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Registration registration = (Registration) o;
-        return getId() != null && Objects.equals(getId(), registration.getId());
+        Question question = (Question) o;
+        return getId() != null && Objects.equals(getId(), question.getId());
     }
 
     @Override

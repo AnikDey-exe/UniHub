@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,4 +22,5 @@ public class RegistrationDTO {
     private RegistrationStatus status;
     private AppUserSummaryDTO attendee;
     private EventSummaryDTO event;
+    private List<AnswerDTO> answers;
 }

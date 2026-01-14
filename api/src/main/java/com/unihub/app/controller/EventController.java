@@ -1,5 +1,6 @@
 package com.unihub.app.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.CreateEventRequest;
 import com.unihub.app.dto.request.EventSearchRequest;
@@ -59,7 +60,7 @@ public class EventController {
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 
     @PostMapping("/create")
-    public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException {
+    public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException, JsonProcessingException {
         return ResponseEntity.ok().body(eventService.saveEvent(event, image));
     }
 

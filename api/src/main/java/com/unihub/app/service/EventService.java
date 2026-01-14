@@ -1,19 +1,21 @@
 package com.unihub.app.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.request.CreateEventRequest;
 import com.unihub.app.dto.request.EventSearchRequest;
+import com.unihub.app.dto.request.QuestionRequest;
 import com.unihub.app.dto.request.UpdateEventRequest;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
-import com.unihub.app.model.AppUser;
-import com.unihub.app.model.Event;
-import com.unihub.app.model.Registration;
-import com.unihub.app.model.RegistrationStatus;
+import com.unihub.app.model.*;
 import com.unihub.app.repository.AppUserRepo;
 import com.unihub.app.repository.EventRepo;
+import com.unihub.app.repository.QuestionRepo;
 import com.unihub.app.repository.RegistrationRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -31,6 +33,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.unihub.app.util.ArrayOperations.toPostgresArray;
 import static com.unihub.app.util.FileOperations.getFileExtension;
 
 @Service
@@ -43,6 +47,8 @@ public class EventService {
     private AppUserRepo appUserRepo;
     @Autowired
     private RegistrationRepo registrationRepo;
+    @Autowired
+    private QuestionRepo questionRepo;
     @Autowired
     private DTOMapper dtoMapper;
     @Autowired
@@ -221,7 +227,9 @@ public class EventService {
         return dtoMapper.toEventDTO(updatedEvent);
     }
 
-    public EventDTO saveEvent(CreateEventRequest eventRequest, MultipartFile image) throws FileUploadException {
+    // update to support questions
+    @Transactional
+    public EventDTO saveEvent(CreateEventRequest eventRequest, MultipartFile image) throws FileUploadException, JsonProcessingException {
         AppUser user = null;
         user = appUserRepo.findById(eventRequest.getCreatorId())
                     .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -236,11 +244,21 @@ public class EventService {
         event.setCapacity(eventRequest.getCapacity());
         event.setEventStartDateUtc(eventRequest.getEventStartDateUtc());
         event.setEventEndDateUtc(eventRequest.getEventEndDateUtc());
+        event.setMaxTickets(eventRequest.getMaxTickets());
+        event.setRequiresApproval(eventRequest.isRequiresApproval());
+        event.setApprovalSuccessMessage(eventRequest.getApprovalSuccessMessage());
 
-        if (user != null) {
-            event.setCreator(user);
-            user.getEventsCreated().add(event);
-        }
+//        if (user != null) {
+//            event.setCreator(user);
+//            user.getEventsCreated().add(event);
+//        }
+
+        // make the questions
+        ObjectMapper mapper = new ObjectMapper();
+        List<QuestionRequest> questions = mapper.readValue(
+                eventRequest.getQuestionsJson(),
+                new TypeReference<List<QuestionRequest>>() {}
+        );
 
         String thumbnail = "";
 
@@ -309,12 +327,12 @@ public class EventService {
             INSERT INTO events.event (
                 name, type, description, location, capacity, image,
                 num_attendees, event_start_date_utc, event_end_date_utc,
-                event_timezone, creator_user_id, embedding
+                event_timezone, creator_user_id, max_tickets, requires_approval, approval_success_message, embedding
             )
             VALUES (
                 :name, :type, :description, :location, :capacity, :image,
                 :numAttendees, :startDate, :endDate,
-                :timezone, :creatorId, '%s'::vector
+                :timezone, :creatorId, :maxTickets, :requiresApproval, :approvalSuccessMessage, '%s'::vector
             )
             RETURNING id
             """, embeddingLiteral);
@@ -331,15 +349,40 @@ public class EventService {
                 .setParameter("endDate", event.getEventEndDateUtc())
                 .setParameter("timezone", event.getEventTimezone())
                 .setParameter("creatorId", user != null ? user.getId() : null)
+                .setParameter("maxTickets", event.getMaxTickets())
+                .setParameter("requiresApproval", event.isRequiresApproval())
+                .setParameter("approvalSuccessMessage", event.getApprovalSuccessMessage())
                 .getSingleResult();
 
-        event.setId(generatedId);
-        EventDTO eventDTO = dtoMapper.toEventDTO(event);
-        log.info("Event with id: {} saved successfully", event.getName());
+        em.flush();
+        em.clear(); // Clear the persistence context
+
+// Now fetch it again to get a truly fresh managed entity
+        Event managedEvent = em.find(Event.class, generatedId);
+
+        List<Question> questionEntities = questions.stream()
+                .map(qr -> {
+                    Question q = new Question();
+                    q.setQuestion(qr.getQuestion());
+                    q.setType(qr.getType());
+                    q.setChoices(qr.getChoices().toArray(new String[0]));
+                    q.setRequired(qr.isRequired());
+                    q.setEvent(managedEvent); // important
+                    return q;
+                })
+                .toList();
+
+        for (Question q : questionEntities) {
+            questionRepo.save(q);
+        }
+
+        questionRepo.saveAll(questionEntities);
+        EventDTO eventDTO = dtoMapper.toEventDTO(managedEvent);
+        log.info("Event with id: {} saved successfully", managedEvent.getName());
         return eventDTO;
     }
 
-    // change to registration
+    // update to support answers
     @Transactional
     public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status) {
         Event event = eventRepo.findById(eventId)
@@ -390,7 +433,7 @@ public class EventService {
         emailService.sendSimpleEmailAsync(email);
     }
 
-    // change to registration
+    // update to support answers
     @Transactional
     public void unrsvpEvent(Integer eventId, String userEmail) {
         Event event = eventRepo.findById(eventId)

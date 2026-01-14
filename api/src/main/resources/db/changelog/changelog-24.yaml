@@ -1,0 +1,10 @@
+databaseChangeLog:
+- changeSet:
+    id: 1768357262597-1
+    author: anikdey (generated)
+    changes:
+    - modifyDataType:
+        columnName: type
+        newDataType: varchar(255)
+        tableName: question
+

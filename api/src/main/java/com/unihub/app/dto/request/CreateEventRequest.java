@@ -20,4 +20,8 @@ public class CreateEventRequest {
     private Instant eventEndDateUtc;
     private String eventTimezone;
     private int creatorId;
+    private String questionsJson;
+    private int maxTickets;
+    private boolean requiresApproval;
+    private String approvalSuccessMessage;
 }

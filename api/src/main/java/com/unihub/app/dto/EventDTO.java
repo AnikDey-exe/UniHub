@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -24,5 +25,9 @@ public class EventDTO {
     private String eventTimezone;
     private AppUserSummaryDTO creator;
     private Set<RegistrationDTO> attendees;
+    private int maxTickets;
+    private boolean required;
+    private List<QuestionDTO> questions;
+    private String approvalSuccessMessage;
 }
 
