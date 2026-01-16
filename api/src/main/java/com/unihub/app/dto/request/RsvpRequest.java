@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,4 +16,5 @@ public class RsvpRequest {
     private String displayName;
     private Integer tickets = 1;
     private RegistrationStatus status;
+    private List<AnswerRequest> answers;
 }

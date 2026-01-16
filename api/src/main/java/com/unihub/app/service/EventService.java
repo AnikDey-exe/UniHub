@@ -6,17 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
-import com.unihub.app.dto.request.CreateEventRequest;
-import com.unihub.app.dto.request.EventSearchRequest;
-import com.unihub.app.dto.request.QuestionRequest;
-import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.request.*;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
 import com.unihub.app.model.*;
-import com.unihub.app.repository.AppUserRepo;
-import com.unihub.app.repository.EventRepo;
-import com.unihub.app.repository.QuestionRepo;
-import com.unihub.app.repository.RegistrationRepo;
+import com.unihub.app.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +43,8 @@ public class EventService {
     private RegistrationRepo registrationRepo;
     @Autowired
     private QuestionRepo questionRepo;
+    @Autowired
+    private AnswerRepo answerRepo;
     @Autowired
     private DTOMapper dtoMapper;
     @Autowired
@@ -387,7 +383,7 @@ public class EventService {
 
     // update to support answers
     @Transactional
-    public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status) {
+    public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status, List<AnswerRequest> answers) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         AppUser attendee = appUserRepo.findByEmail(userEmail)
@@ -395,6 +391,7 @@ public class EventService {
 
         if (event.getNumAttendees() >= event.getCapacity()) throw new CapacityLimitReachedException("Event is at full capacity");
         if (event.getNumAttendees() + tickets > event.getCapacity()) throw new CapacityLimitReachedException("Event does not have enough capacity for the number of tickets you requested");
+        if (tickets > event.getMaxTickets()) throw new CapacityLimitReachedException("You can only request up to "+event.getMaxTickets()+" tickets");
 
         boolean alreadyRegistered = em.createQuery("""
             SELECT COUNT(r)
@@ -407,6 +404,21 @@ public class EventService {
 
         if (alreadyRegistered) throw new UserAlreadyRegisteredException("User is already registered for event");
 
+        if (event.getQuestions() != null) {
+            List<Integer> requiredQuestionIds =
+                    event.getQuestions().stream()
+                            .filter(Question::isRequired)
+                            .map(Question::getId)
+                            .toList();
+            Set<Integer> answeredQuestionIds = answers == null ? Set.of() :
+                    answers.stream()
+                            .map(AnswerRequest::getQuestionId)
+                            .collect(Collectors.toSet());
+            if (!answeredQuestionIds.containsAll(requiredQuestionIds)) {
+                throw new MissingRequiredAnswersException("All required questions must be answered");
+            }
+        }
+
         Registration registration = new Registration();
         registration.setEvent(event);
         registration.setAttendee(attendee);
@@ -414,10 +426,35 @@ public class EventService {
         registration.setTickets(tickets);
         registration.setStatus(status);
 
-        em.detach(event);
         registrationRepo.save(registration);
 
+        if (answers != null) {
+            for (AnswerRequest ar : answers) {
+                Question question = questionRepo.findById(ar.getQuestionId())
+                        .orElseThrow(() ->
+                                new QuestionNotFoundException("Invalid question")
+                        );
+
+                if (!question.getEvent().getId().equals(eventId)) {
+                    throw new IllegalArgumentException("Question does not belong to this event");
+                }
+
+                Answer answer = new Answer();
+                answer.setRegistration(registration);
+                answer.setQuestion(question);
+                answer.setSingleAnswer(ar.getSingleAnswer());
+                answer.setMultiAnswer(
+                        ar.getMultiAnswer() != null
+                                ? ar.getMultiAnswer().toArray(new String[0])
+                                : null
+                );
+
+                answerRepo.save(answer);
+            }
+        }
+
         if (status == RegistrationStatus.APPROVED) {
+            em.detach(event);
             em.createNativeQuery("""
                    UPDATE events.event
                    SET num_attendees = num_attendees + :tickets
@@ -428,9 +465,6 @@ public class EventService {
                     .executeUpdate();
             event.setNumAttendees(event.getNumAttendees() + tickets);
         }
-
-//        event.getAttendees().add(registration);
-//        attendee.getEventsAttended().add(registration);
 
         EmailDTO email = new EmailDTO(userEmail, "You have been registered for "+event.getName()+"! Check your registration status in your profile to see if it got approved.", "Registration Confirmation");
         emailService.sendSimpleEmailAsync(email);

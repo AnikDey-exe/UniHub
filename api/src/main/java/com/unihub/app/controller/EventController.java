@@ -67,7 +67,7 @@ public class EventController {
     // change to registration
     @PostMapping("/rsvp")
     public ResponseEntity<Void> rsvpEvent(@RequestBody RsvpRequest rsvpBody) {
-        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail(), rsvpBody.getDisplayName(), rsvpBody.getTickets(), rsvpBody.getStatus());
+        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail(), rsvpBody.getDisplayName(), rsvpBody.getTickets(), rsvpBody.getStatus(), rsvpBody.getAnswers());
         return ResponseEntity.ok().build();
     }
 

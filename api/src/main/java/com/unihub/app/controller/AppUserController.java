@@ -66,6 +66,7 @@ public class AppUserController {
         return ResponseEntity.ok().body(loginResponse);
     }
 
+    // make all requests check jwt for user
     @GetMapping("/me")
     public ResponseEntity<AppUserDTO> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername(); // email from JWT

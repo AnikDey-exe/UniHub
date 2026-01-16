@@ -1,5 +1,6 @@
 package com.unihub.app.dto;
 
+import com.unihub.app.model.RegistrationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnswerDTO {
+public class RegistrationSummaryDTO {
     private Integer id;
-    private String singleAnswer;
-    private String[] multiAnswer;
-    private QuestionDTO question;
-    private RegistrationSummaryDTO registration;
+    private String displayName;
+    private Integer tickets;
+    private RegistrationStatus status;
 }

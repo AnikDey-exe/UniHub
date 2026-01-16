@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(QuestionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleQuestionNotFound(QuestionNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(UserAlreadyRegisteredException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyRegistered(UserAlreadyRegisteredException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
@@ -40,6 +46,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotRegisteredException.class)
     public ResponseEntity<ErrorResponse> handleUserNotRegistered(UserNotRegisteredException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MissingRequiredAnswersException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequiredAnswers(MissingRequiredAnswersException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
         return ResponseEntity.badRequest().body(error);
     }
