@@ -439,6 +439,13 @@ public class EventService {
                     throw new IllegalArgumentException("Question does not belong to this event");
                 }
 
+                if ((question.getType() == QuestionType.MULTISELECT && ar.getMultiAnswer() == null)
+                        || (
+                                (question.getType() == QuestionType.CHOICE || question.getType() == QuestionType.TYPED) && ar.getSingleAnswer() == null)
+                            ) {
+                    throw new InvalidAnswerException("Your answers are invalid, please check it again");
+                }
+
                 Answer answer = new Answer();
                 answer.setRegistration(registration);
                 answer.setQuestion(question);
@@ -470,7 +477,6 @@ public class EventService {
         emailService.sendSimpleEmailAsync(email);
     }
 
-    // update to support answers
     @Transactional
     public void unrsvpEvent(Integer eventId, String userEmail) {
         Event event = eventRepo.findById(eventId)

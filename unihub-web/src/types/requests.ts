@@ -84,4 +84,5 @@ export interface RSVPRequest {
     displayName?: string;
     tickets?: number;
     status?: RegistrationStatus;
+    questionsJson?: string;
 }

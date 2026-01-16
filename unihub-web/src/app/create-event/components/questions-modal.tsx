@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import * as React from "react"
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -487,11 +488,11 @@ export function QuestionsModal({
                     </Label>
 
                     {question.type === QuestionType.TYPED && (
-                      <Input
-                        type="text"
+                      <Textarea
                         placeholder="Type your answer..."
                         value={(previewAnswers[index] as string) || ""}
                         onChange={(e) => handlePreviewAnswerChange(index, e.target.value)}
+                        rows={3}
                       />
                     )}
 

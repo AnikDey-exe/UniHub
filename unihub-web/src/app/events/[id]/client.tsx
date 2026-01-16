@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck } from "lucide-react"
+import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck, Ticket, ShieldCheck } from "lucide-react"
 import { Event, RegistrationStatus } from "@/types/responses"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { formatEventDate } from "@/utils/formatEventDate"
@@ -46,7 +46,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
-  const handleRegister = (displayName: string, tickets: number) => {
+  const handleRegister = (displayName: string, tickets: number, questionsJson?: string) => {
     if (!user) {
       router.push('/login')
       return
@@ -72,6 +72,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           displayName: displayName.trim(),
           tickets: ticketsNumber,
           status: RegistrationStatus.APPROVED,
+          questionsJson,
         },
         token,
       },
@@ -237,6 +238,30 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                   </div>
                 </div>
               )}
+
+              {eventData && eventData.maxTickets > 0 && (
+                <div className="flex items-center gap-3 text-foreground">
+                  <Ticket className="h-5 w-5 flex-shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-base">Max Tickets per Registration</span>
+                    <span className="text-sm text-muted-foreground">
+                      Up to {eventData.maxTickets} ticket{eventData.maxTickets !== 1 ? 's' : ''} per person
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {eventData && (
+                <div className="flex items-center gap-3 text-foreground">
+                  <ShieldCheck className="h-5 w-5 flex-shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-base">Approval Required</span>
+                    <span className="text-sm text-muted-foreground">
+                      {eventData.approvalRequired ? 'Yes - Registration requires organizer approval' : 'No - Registration is automatic'}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -311,6 +336,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
         open={isRegistrationModalOpen}
         onOpenChange={setIsRegistrationModalOpen}
         user={user}
+        questions={eventData?.questions}
         onSubmit={handleRegister}
         isPending={rsvpMutation.isPending}
       />
