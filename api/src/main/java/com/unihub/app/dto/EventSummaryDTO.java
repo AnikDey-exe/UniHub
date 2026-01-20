@@ -23,6 +23,6 @@ public class EventSummaryDTO {
     private Instant eventEndDateUtc;
     private String eventTimezone;
     private int maxTickets;
-    private boolean required;
+    private boolean requiresApproval;
     private String approvalSuccessMessage;
 }

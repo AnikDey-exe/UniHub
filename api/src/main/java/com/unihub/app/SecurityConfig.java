@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/events/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/events/recommended/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/events/registrations/*").permitAll()
                         .requestMatchers("/api/events/search").permitAll()
                         .requestMatchers("/api/colleges/search").permitAll()
                         .anyRequest()

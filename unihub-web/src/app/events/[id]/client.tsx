@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck, Ticket, ShieldCheck } from "lucide-react"
 import { Event, RegistrationStatus } from "@/types/responses"
+import { AnswerRequest } from "@/types/requests"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { formatEventDate } from "@/utils/formatEventDate"
 import { useCurrentUser } from "@/context/user-context"
@@ -32,7 +33,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
 
   // Calculate total attendees count from registrations (sum of tickets)
-  const attendeesCount = eventData?.attendees?.reduce((sum, registration) => sum + registration.tickets, 0) || 0
+  const attendeesCount = eventData?.numAttendees || 0
   
   const university = eventData?.creator 
     ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
@@ -46,7 +47,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
-  const handleRegister = (displayName: string, tickets: number, questionsJson?: string) => {
+  const handleRegister = (displayName: string, tickets: number, answers?: AnswerRequest[]) => {
     if (!user) {
       router.push('/login')
       return
@@ -71,8 +72,8 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           userEmail: user.email,
           displayName: displayName.trim(),
           tickets: ticketsNumber,
-          status: RegistrationStatus.APPROVED,
-          questionsJson,
+          status: eventData?.requiresApproval ? RegistrationStatus.PENDING : RegistrationStatus.APPROVED,
+          answers,
         },
         token,
       },
@@ -257,7 +258,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                   <div className="flex flex-col">
                     <span className="text-base">Approval Required</span>
                     <span className="text-sm text-muted-foreground">
-                      {eventData.approvalRequired ? 'Yes - Registration requires organizer approval' : 'No - Registration is automatic'}
+                      {eventData.requiresApproval ? 'Yes - Registration requires organizer approval' : 'No - Registration is automatic'}
                     </span>
                   </div>
                 </div>
@@ -301,10 +302,17 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           </p>
         </div>
 
-        {isCreator && eventData?.attendees !== undefined && (
+        {isCreator && (
           <div className="mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">Attendees ({attendeesCount})</h2>
-            <AttendeesList attendees={eventData.attendees} />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold">Attendees ({attendeesCount})</h2>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/events/${event.id}/attendees`)}
+              >
+                View All
+              </Button>
+            </div>
           </div>
         )}
 

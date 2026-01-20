@@ -44,7 +44,7 @@ export interface Event {
     creator?: UserSummary;
     attendees?: Registration[];
     maxTickets: number;
-    approvalRequired: boolean;
+    requiresApproval: boolean;
     questions?: Question[];
     approvalSuccessMessage?: string;
 }
@@ -69,7 +69,7 @@ export interface EventSummary {
     eventEndDateUtc: string;
     eventTimezone: string;
     maxTickets: number;
-    approvalRequired: boolean;
+    requiresApproval: boolean;
     approvalSuccessMessage?: string;
 }
 
@@ -101,6 +101,22 @@ export interface Registration {
     status: RegistrationStatus;
     event: EventSummary;
     attendee: UserSummary;
+    answers?: Answer[];
+}
+
+export interface RegistrationSummary {
+    id: number;
+    displayName: string;
+    tickets: number;
+    status: RegistrationStatus;
+}
+
+export interface Answer {
+    id: number;
+    singleAnswer?: string;
+    multiAnswer?: string[];
+    question: Question;
+    registration: RegistrationSummary;
 }
 
 export interface Question {

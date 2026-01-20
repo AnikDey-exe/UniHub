@@ -70,7 +70,7 @@ public class Event {
 //            joinColumns = @JoinColumn(name = "event_id"),
 //            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
 //    )
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<Registration> attendees;
 

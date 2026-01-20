@@ -2,6 +2,7 @@ package com.unihub.app.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.RegistrationDTO;
 import com.unihub.app.dto.request.CreateEventRequest;
 import com.unihub.app.dto.request.EventSearchRequest;
 import com.unihub.app.dto.request.RsvpRequest;
@@ -52,6 +53,9 @@ public class EventController {
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEvent(eventId)); }
+
+    @GetMapping("/registrations/{eventId}")
+    public ResponseEntity<List<RegistrationDTO>> getEventRegistrations(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEventRegistrations(eventId)); }
 
     @GetMapping("/recommended/{eventId}")
     public ResponseEntity<List<EventDTO>> getRecommendedEvents(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getRecommendedEvents(eventId)); }

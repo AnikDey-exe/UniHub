@@ -15,8 +15,9 @@ public interface DTOMapper {
 
     // Event -> EventDTO
     @Mapping(target = "creator", source = "creator")
-    @Mapping(target = "attendees", source = "attendees")
+//    @Mapping(target = "attendees", source = "attendees")
     @Mapping(target = "questions", source = "questions")
+    @Mapping(target = "requiresApproval", source = "requiresApproval")
     EventDTO toEventDTO(Event event);
 
     // AppUser -> AppUserDTO
@@ -44,6 +45,7 @@ public interface DTOMapper {
 
     List<AppUserSummaryDTO> toAppSummaryDTO(List<AppUser> appUsers);
 
+    @Mapping(target = "requiresApproval", source = "requiresApproval")
     EventSummaryDTO toEventSummaryDTO(Event event);
 
     List<EventSummaryDTO> toEventSummaryDTO(List<Event> events);

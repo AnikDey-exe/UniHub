@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { User, Question, QuestionType } from "@/types/responses"
+import { AnswerRequest } from "@/types/requests"
 import { cn } from "@/utils/cn"
 
 interface RegistrationModalProps {
@@ -14,7 +15,7 @@ interface RegistrationModalProps {
   onOpenChange: (open: boolean) => void
   user: User | undefined | null
   questions?: Question[]
-  onSubmit: (displayName: string, tickets: number, questionsJson?: string) => void
+  onSubmit: (displayName: string, tickets: number, answers?: AnswerRequest[]) => void
   isPending: boolean
 }
 
@@ -30,7 +31,6 @@ export function RegistrationModal({
   const [tickets, setTickets] = useState("1")
   const [questionAnswers, setQuestionAnswers] = useState<(string | string[])[]>([])
 
-  // Set default display name when modal opens or user changes
   useEffect(() => {
     if (open && user) {
       const defaultName = `${user.firstName} ${user.lastName}`.trim()
@@ -38,14 +38,12 @@ export function RegistrationModal({
     }
   }, [open, user])
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       setDisplayName("")
       setTickets("1")
       setQuestionAnswers([])
     } else {
-      // Initialize question answers array
       setQuestionAnswers(Array(questions.length).fill(null))
     }
   }, [open, questions.length])
@@ -58,7 +56,6 @@ export function RegistrationModal({
     })
   }
 
-  // Check if all required questions are answered
   const areRequiredQuestionsAnswered = questions.every((question, index) => {
     if (!question.required) return true
     const answer = questionAnswers[index]
@@ -72,20 +69,35 @@ export function RegistrationModal({
     e.preventDefault()
     const ticketsNumber = Number(tickets) || 1
     if (displayName.trim() && ticketsNumber > 0 && areRequiredQuestionsAnswered) {
-      // Build questions JSON
-      let questionsJson: string | undefined
+      let answers: AnswerRequest[] | undefined
       if (questions.length > 0) {
-        const answersMap: Record<number, string | string[]> = {}
-        questions.forEach((question, index) => {
-          const answer = questionAnswers[index]
-          if (answer !== null && answer !== undefined) {
-            answersMap[question.id] = answer
-          }
-        })
-        questionsJson = JSON.stringify(answersMap)
+        answers = questions
+          .map((question, index) => {
+            const answer = questionAnswers[index]
+            if (answer === null || answer === undefined) {
+              return null
+            }
+
+            const answerRequest: AnswerRequest = {
+              questionId: question.id,
+            }
+
+            if (question.type === QuestionType.MULTISELECT) {
+              answerRequest.multiAnswer = Array.isArray(answer) ? answer : []
+            } else {
+              answerRequest.singleAnswer = typeof answer === 'string' ? answer : String(answer)
+            }
+
+            return answerRequest
+          })
+          .filter((answer): answer is AnswerRequest => answer !== null)
+        
+        if (answers.length === 0) {
+          answers = undefined
+        }
       }
 
-      onSubmit(displayName.trim(), ticketsNumber, questionsJson)
+      onSubmit(displayName.trim(), ticketsNumber, answers)
     }
   }
 
@@ -122,19 +134,16 @@ export function RegistrationModal({
             value={tickets}
             onChange={(e) => {
               const inputValue = e.target.value
-              // Allow empty string while typing
               if (inputValue === "") {
                 setTickets("")
                 return
               }
-              // Only allow positive integers
               const numValue = parseInt(inputValue, 10)
               if (!isNaN(numValue) && numValue > 0) {
                 setTickets(inputValue)
               }
             }}
             onBlur={(e) => {
-              // Ensure we have a valid value on blur
               const numValue = parseInt(e.target.value, 10)
               if (isNaN(numValue) || numValue < 1) {
                 setTickets("1")

@@ -57,7 +57,7 @@ export function CreateEventClient() {
     endDate: null,
     image: null,
     maxTickets: "1",
-    approvalRequired: false,
+    requiresApproval: false,
     approvalSuccessMessage: ""
   })
 
@@ -176,7 +176,7 @@ export function CreateEventClient() {
     formDataToSend.append('eventEndDateUtc', dayjs(formData.endDate).utc().toISOString())
     formDataToSend.append('creatorId', user.id.toString())
     formDataToSend.append('maxTickets', (Number(formData.maxTickets) || 1).toString())
-    formDataToSend.append('approvalRequired', formData.approvalRequired.toString())
+    formDataToSend.append('requiresApproval', formData.requiresApproval.toString())
     if (formData.approvalSuccessMessage) {
       formDataToSend.append('approvalSuccessMessage', formData.approvalSuccessMessage)
     }
@@ -435,11 +435,11 @@ export function CreateEventClient() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="approvalRequired">Require Approval</Label>
+                    <Label htmlFor="requiresApproval">Require Approval</Label>
                     <Switch
-                      id="approvalRequired"
-                      checked={formData.approvalRequired}
-                      onCheckedChange={(checked) => handleInputChange("approvalRequired", checked)}
+                      id="requiresApproval"
+                      checked={formData.requiresApproval}
+                      onCheckedChange={(checked) => handleInputChange("requiresApproval", checked)}
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -448,7 +448,7 @@ export function CreateEventClient() {
                 </div>
               </div>
 
-              {formData.approvalRequired && (
+              {formData.requiresApproval && (
                 <div className="space-y-2">
                   <Label htmlFor="approvalSuccessMessage">Approval Success Message</Label>
                   <Textarea

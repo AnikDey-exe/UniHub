@@ -114,13 +114,13 @@ export function ProfileClient() {
                 <Plus className="h-4 w-4" />
                 Create Event
               </Button>
-              <button
-                onClick={() => router.push("/settings")}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
-                aria-label="Settings"
-              >
-                <Settings className="h-5 w-5 text-foreground" />
-              </button>
+            <button
+              onClick={() => router.push("/settings")}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-foreground" />
+            </button>
             </div>
           </div>
         </div>

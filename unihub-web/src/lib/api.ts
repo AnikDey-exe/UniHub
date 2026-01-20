@@ -1,5 +1,5 @@
 import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest, CollegeSearchRequest } from "@/types/requests";
-import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse } from "@/types/responses";
+import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse, Registration } from "@/types/responses";
 
 const API_BASE_URL = typeof window === 'undefined' 
 ? process.env.API_URL  // Server-side: use host.docker.internal
@@ -171,6 +171,11 @@ export const eventsAPI = {
   
   recommendedEvents: (id: number) =>
     apiFetch<Event[]>(`/api/events/recommended/${id}`, {
+      method: 'GET',
+    }),
+
+  getEventRegistrations: (id: number) =>
+    apiFetch<Registration[]>(`/api/events/registrations/${id}`, {
       method: 'GET',
     })
 };

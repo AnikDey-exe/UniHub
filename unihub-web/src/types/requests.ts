@@ -39,7 +39,7 @@ export interface EventCreateRequest {
     creatorId: number;
     questionsJson?: string;
     maxTickets: number;
-    approvalRequired: boolean;
+    requiresApproval: boolean;
     approvalSuccessMessage?: string;
 }
 
@@ -48,6 +48,12 @@ export interface QuestionRequest {
     type: QuestionType;
     choices: string[];
     required: boolean;
+}
+
+export interface AnswerRequest {
+    questionId: number;
+    singleAnswer?: string;
+    multiAnswer?: string[];
 }
 
 export interface EventUpdateRequest {
@@ -84,5 +90,5 @@ export interface RSVPRequest {
     displayName?: string;
     tickets?: number;
     status?: RegistrationStatus;
-    questionsJson?: string;
+    answers?: AnswerRequest[];
 }

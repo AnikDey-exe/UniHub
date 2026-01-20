@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
+import com.unihub.app.dto.RegistrationDTO;
 import com.unihub.app.dto.request.*;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
@@ -205,8 +206,16 @@ public class EventService {
     public EventDTO getEvent(Integer eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
         EventDTO eventDto = dtoMapper.toEventDTO(event);
-
         return eventDto;
+    }
+
+    public List<RegistrationDTO> getEventRegistrations(Integer eventId) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+        List<Registration> registrations = registrationRepo.findAllByEvent(event);
+        List<RegistrationDTO> registrationDtos = new ArrayList<>();
+        for (Registration registration : registrations) registrationDtos.add(dtoMapper.toRegistrationDTO(registration));
+
+        return registrationDtos;
     }
 
 //    fix

@@ -24,9 +24,9 @@ public class EventDTO {
     private Instant eventEndDateUtc;
     private String eventTimezone;
     private AppUserSummaryDTO creator;
-    private Set<RegistrationDTO> attendees;
+//    private Set<RegistrationDTO> attendees;
     private int maxTickets;
-    private boolean required;
+    private boolean requiresApproval;
     private List<QuestionDTO> questions;
     private String approvalSuccessMessage;
 }
