@@ -6,18 +6,38 @@ import { Registration, RegistrationStatus } from "@/types/responses"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/utils/cn"
+import { useUpdateRegistrationStatus } from "@/hooks/use-update-registration-status"
+import { useCurrentUser } from "@/context/user-context"
 
 interface AttendeeCardProps {
   registration: Registration
+  canUpdateStatus?: boolean
+  eventId?: number
   className?: string
 }
 
-export function AttendeeCard({ registration, className }: AttendeeCardProps) {
+export function AttendeeCard({ registration, canUpdateStatus = false, eventId, className }: AttendeeCardProps) {
   const { attendee, displayName, tickets, status, answers = [] } = registration
   const fullName = `${attendee.firstName} ${attendee.lastName}`
   const initials = `${attendee.firstName[0]}${attendee.lastName[0]}`.toUpperCase()
   const nameToDisplay = displayName || fullName
+  const { user } = useCurrentUser()
+  const updateStatusMutation = useUpdateRegistrationStatus(eventId || 0)
+
+  const handleStatusChange = (newStatus: RegistrationStatus) => {
+    if (!user || !eventId) return
+    
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    updateStatusMutation.mutate({
+      registrationId: registration.id,
+      newStatus,
+      token,
+    })
+  }
 
   const getStatusIcon = () => {
     switch (status) {
@@ -114,9 +134,52 @@ export function AttendeeCard({ registration, className }: AttendeeCardProps) {
               {getStatusIcon()}
               <span className="text-sm text-muted-foreground">Status</span>
             </div>
-            <span className={cn("text-sm font-medium", getStatusColor())}>
-              {getStatusText()}
-            </span>
+            {canUpdateStatus ? (
+              <Select
+                value={status}
+                onValueChange={(value) => handleStatusChange(value as RegistrationStatus)}
+                disabled={updateStatusMutation.isPending}
+              >
+                <SelectTrigger className={cn("h-8 w-[140px] text-xs", getStatusColor())}>
+                  <SelectValue>
+                    <div className="flex items-center gap-1.5">
+                      {getStatusIcon()}
+                      <span className="font-medium">{getStatusText()}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={RegistrationStatus.PENDING}>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3" />
+                      <span>Pending</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value={RegistrationStatus.APPROVED}>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Approved</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value={RegistrationStatus.REJECTED}>
+                    <div className="flex items-center gap-2">
+                      <XCircle className="h-3 w-3" />
+                      <span>Rejected</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value={RegistrationStatus.CANCELLED}>
+                    <div className="flex items-center gap-2">
+                      <Ban className="h-3 w-3" />
+                      <span>Cancelled</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className={cn("text-sm font-medium", getStatusColor())}>
+                {getStatusText()}
+              </span>
+            )}
           </div>
         </div>
 
@@ -150,10 +213,12 @@ export function AttendeeCard({ registration, className }: AttendeeCardProps) {
 
 interface AttendeesListProps {
   attendees: Registration[]
+  canUpdateStatus?: boolean
+  eventId?: number
   className?: string
 }
 
-export function AttendeesList({ attendees, className }: AttendeesListProps) {
+export function AttendeesList({ attendees, canUpdateStatus = false, eventId, className }: AttendeesListProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredAttendees = useMemo(() => {
@@ -200,6 +265,8 @@ export function AttendeesList({ attendees, className }: AttendeesListProps) {
             <AttendeeCard
               key={registration.id}
               registration={registration}
+              canUpdateStatus={canUpdateStatus}
+              eventId={eventId}
             />
           ))}
         </div>

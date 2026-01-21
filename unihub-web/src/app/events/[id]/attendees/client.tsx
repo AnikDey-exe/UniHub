@@ -39,7 +39,7 @@ export function EventAttendeesClient({ event }: EventAttendeesClientProps) {
             <Loading variant="spinner" size="md" />
           </div>
         ) : registrations && registrations.length > 0 ? (
-          <AttendeesList attendees={registrations} />
+          <AttendeesList attendees={registrations} canUpdateStatus={true} eventId={event.id} />
         ) : (
           <div className="flex items-center justify-center py-12 border border-dashed border-border rounded-lg bg-muted/30">
             <p className="text-muted-foreground text-lg">No attendees yet</p>

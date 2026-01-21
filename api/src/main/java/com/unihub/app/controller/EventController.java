@@ -3,12 +3,10 @@ package com.unihub.app.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.RegistrationDTO;
-import com.unihub.app.dto.request.CreateEventRequest;
-import com.unihub.app.dto.request.EventSearchRequest;
-import com.unihub.app.dto.request.RsvpRequest;
-import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.request.*;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.model.Event;
+import com.unihub.app.model.RegistrationStatus;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -62,6 +60,9 @@ public class EventController {
 
     @PutMapping("/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
+
+    @PutMapping("/update-registration-status/{registrationId}")
+    public ResponseEntity<RegistrationDTO> updateRegistrationStatus(@PathVariable Integer registrationId, @RequestBody UpdateRegistrationRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateRegistrationStatus(registrationId, toUpdate.getNewStatus())); }
 
     @PostMapping("/create")
     public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException, JsonProcessingException {

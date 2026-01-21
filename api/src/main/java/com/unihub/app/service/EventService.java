@@ -218,6 +218,14 @@ public class EventService {
         return registrationDtos;
     }
 
+    public RegistrationDTO updateRegistrationStatus(Integer registrationId, RegistrationStatus newStatus) {
+        Registration registration = registrationRepo.findById(registrationId).orElseThrow(() -> new RegistrationNotFoundException("Registration not found"));
+        registration.setStatus(newStatus);
+        registrationRepo.save(registration);
+
+        return dtoMapper.toRegistrationDTO(registration);
+    }
+
 //    fix
     public EventDTO updateEvent(Integer eventId, UpdateEventRequest toUpdate) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
