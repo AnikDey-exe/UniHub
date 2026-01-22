@@ -218,11 +218,40 @@ public class EventService {
         return registrationDtos;
     }
 
+    @Transactional
     public RegistrationDTO updateRegistrationStatus(Integer registrationId, RegistrationStatus newStatus) {
         Registration registration = registrationRepo.findById(registrationId).orElseThrow(() -> new RegistrationNotFoundException("Registration not found"));
+
+        RegistrationStatus oldStatus = registration.getStatus();
         registration.setStatus(newStatus);
         registrationRepo.save(registration);
 
+        Event event = registration.getEvent();
+        if (oldStatus == RegistrationStatus.APPROVED && List.of(RegistrationStatus.REJECTED, RegistrationStatus.CANCELLED, RegistrationStatus.PENDING).contains(newStatus)) {
+            em.detach(event);
+            em.createNativeQuery("""
+                                       UPDATE events.event
+                                       SET num_attendees = num_attendees - :tickets
+                                       WHERE id = :eventId
+                               """)
+                    .setParameter("tickets", registration.getTickets())
+                    .setParameter("eventId", event.getId())
+                    .executeUpdate();
+            event.setNumAttendees(event.getNumAttendees() - registration.getTickets());
+        } else if (List.of(RegistrationStatus.REJECTED, RegistrationStatus.CANCELLED, RegistrationStatus.PENDING).contains(oldStatus) && newStatus == RegistrationStatus.APPROVED) {
+            if (event.getNumAttendees() < event.getCapacity() && event.getNumAttendees() + registration.getTickets() < event.getCapacity()) {
+                em.detach(event);
+                em.createNativeQuery("""
+                                       UPDATE events.event
+                                       SET num_attendees = num_attendees + :tickets
+                                       WHERE id = :eventId
+                                """)
+                        .setParameter("tickets", registration.getTickets())
+                        .setParameter("eventId", event.getId())
+                        .executeUpdate();
+                event.setNumAttendees(event.getNumAttendees() + registration.getTickets());
+            }
+        }
         return dtoMapper.toRegistrationDTO(registration);
     }
 
