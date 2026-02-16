@@ -133,10 +133,6 @@ export function EventCard({ event, variant = 'default', className, status }: Eve
                   <span>{event.numAttendees || 0} attending</span>
                 </div>
               </div>
-
-              <Button className="w-full" variant="outline" size="sm">
-                View Details
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -183,12 +179,6 @@ export function EventCard({ event, variant = 'default', className, status }: Eve
               </div>
             )}
           </CardContent>
-
-          <CardFooter className="px-0 pt-0 mt-auto">
-            <Button className="w-full bg-transparent" variant="outline">
-              View Details
-            </Button>
-          </CardFooter>
         </div>
       </Card>
     </Link>

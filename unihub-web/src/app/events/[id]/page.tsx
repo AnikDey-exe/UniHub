@@ -32,7 +32,7 @@ export default async function EventDetailsPage({
   return (
     <div className="min-h-screen">
       <Header />
-      <main>
+      <main className="pt-20 md:pt-24">
         <Suspense fallback={<SectionLoading height="600px" className="py-16" />}>
           <EventDetails id={eventId} />
         </Suspense>

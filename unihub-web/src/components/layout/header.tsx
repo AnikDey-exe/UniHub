@@ -21,48 +21,43 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container h-16 px-4 md:px-6">
-        {/* Desktop Layout */}
-        <div className="hidden md:grid md:grid-cols-3 h-full items-center">
-          {/* Left side - Logo */}
-          <div className="flex justify-start">
-            <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="/logo-no-bg.png"
-                alt={`${APP_NAME} logo`}
-                width={90}
-                height={90}
-                className="h-9 w-9 object-cover"
-              />
-              <span className="text-xl font-bold">{APP_NAME}</span>
-            </Link>
-          </div>
+    <header className="fixed top-0 left-0 right-0 z-[100] w-full pt-3 pb-3 px-4 md:pt-4 md:pb-4 md:px-6">
+      {/* Desktop: centered capsule navbar */}
+      <div className="hidden md:flex md:justify-center">
+        <div className="w-full max-w-4xl rounded-full bg-white shadow-[0_2px_12px_4px_rgba(0,0,0,0.08),0_0_2px_rgba(0,0,0,0.06)] px-6 py-2 min-h-[3.5rem] flex items-center">
+          <div className="grid grid-cols-3 w-full items-center">
+            {/* Left side - Logo */}
+            <div className="flex justify-start">
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/logo-no-bg.png"
+                  alt={`${APP_NAME} logo`}
+                  width={90}
+                  height={90}
+                  className="h-9 w-9 object-cover"
+                />
+                <span className="text-xl font-bold text-foreground">{APP_NAME}</span>
+              </Link>
+            </div>
 
-          {/* Center - Navigation */}
-          <nav className="flex items-center justify-center gap-6">
-            <Link
-              href="/events"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Events
-            </Link>
-            <Link
-              href="/colleges"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Colleges
-            </Link>
-            {/* <Link
-              href="/about"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              About
-            </Link> */}
-          </nav>
+            {/* Center - Navigation */}
+            <nav className="flex items-center justify-center gap-6">
+              <Link
+                href="/events"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                Events
+              </Link>
+              <Link
+                href="/colleges"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                Colleges
+              </Link>
+            </nav>
 
-          {/* Right side - Auth buttons */}
-          <div className="flex items-center justify-end gap-3">
+            {/* Right side - Auth buttons */}
+            <div className="flex items-center justify-end gap-3">
             {!user ? (
               <>
                 <Button variant="ghost" size="sm">
@@ -119,11 +114,13 @@ export function Header() {
               </DropdownMenu>
             )}
           </div>
+          </div>
         </div>
+      </div>
 
-        {/* Mobile Layout */}
-        <div className="md:hidden">
-          <div className="flex h-16 items-center justify-between">
+      {/* Mobile Layout */}
+      <div className="md:hidden rounded-full bg-white shadow-[0_2px_12px_4px_rgba(0,0,0,0.08),0_0_2px_rgba(0,0,0,0.06)] px-4">
+        <div className="flex h-14 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
               <Image
@@ -227,7 +224,6 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </div>
         </div>
       </div>
     </header>

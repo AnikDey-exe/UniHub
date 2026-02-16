@@ -12,7 +12,7 @@ const colleges = [
 
 export function CollegesSection({ colleges }: { colleges: College[] }) {
   return (
-    <section className="py-16 md:py-24 border-b border-border/40">
+    <section className="relative isolate py-16 md:py-24 bg-background border-b border-border/40">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight mb-4 md:text-4xl text-balance">

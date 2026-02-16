@@ -5,7 +5,7 @@ export default function CreateEventPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main>
+      <main className="pt-20 md:pt-24">
         <CreateEventClient />
       </main>
     </div>
