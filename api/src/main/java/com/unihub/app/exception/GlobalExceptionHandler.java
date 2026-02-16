@@ -26,8 +26,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(RegistrationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRegistrationNotFound(RegistrationNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(CollegeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleCollegeNotFound(CollegeNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(QuestionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleQuestionNotFound(QuestionNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage(), System.currentTimeMillis());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
@@ -40,6 +52,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotRegisteredException.class)
     public ResponseEntity<ErrorResponse> handleUserNotRegistered(UserNotRegisteredException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(MissingRequiredAnswersException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequiredAnswers(MissingRequiredAnswersException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
         return ResponseEntity.badRequest().body(error);
     }
@@ -58,6 +76,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidEmailException.class)
     public ResponseEntity<ErrorResponse> handleInvalidEmail(InvalidEmailException ex) {
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(InvalidAnswerException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAnswer(InvalidAnswerException ex) {
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), System.currentTimeMillis());
         return ResponseEntity.badRequest().body(error);
     }

@@ -10,6 +10,7 @@ import io.hypersistence.utils.hibernate.type.array.FloatArrayType;
 
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -69,9 +70,22 @@ public class Event {
 //            joinColumns = @JoinColumn(name = "event_id"),
 //            inverseJoinColumns = @JoinColumn(name = "attendee_user_id")
 //    )
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<Registration> attendees;
+
+    @Column(name = "max_tickets", nullable = false)
+    private int maxTickets;
+
+    @Column(name = "requires_approval", nullable = false)
+    private boolean requiresApproval;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Question> questions;
+
+    @Column(name = "approval_success_message")
+    private String approvalSuccessMessage;
 
     @Override
     public final boolean equals(Object o) {

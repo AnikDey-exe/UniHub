@@ -3,8 +3,10 @@ package com.unihub.app.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import org.hibernate.annotations.Type;
 
-import java.util.List;
+
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -14,35 +16,26 @@ import java.util.Objects;
 @ToString
 @Entity
 
-@Table(name = "registration", schema = "events", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"attendee_user_id", "event_id"})
-})
-public class Registration {
+@Table(name = "answer", schema = "events")
+public class Answer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "display_name")
-    private String displayName;
+    @Column(name = "single_answer")
+    private String singleAnswer;
 
-    @Column(nullable = false)
-    private Integer tickets = 1;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RegistrationStatus status = RegistrationStatus.APPROVED;
+    @Type(StringArrayType.class)
+    @Column(name = "multi_answer", columnDefinition = "text[]")
+    private String[] multiAnswer;
 
     @ManyToOne
-    @JoinColumn(name = "attendee_user_id", nullable = false)
-    private AppUser attendee;
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 
     @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
-
-    @OneToMany(mappedBy = "registration", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private List<Answer> answers;
+    @JoinColumn(name = "registration_id", nullable = false)
+    private Registration registration;
 
     @Override
     public final boolean equals(Object o) {
@@ -51,8 +44,8 @@ public class Registration {
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        Registration registration = (Registration) o;
-        return getId() != null && Objects.equals(getId(), registration.getId());
+        Answer answer = (Answer) o;
+        return getId() != null && Objects.equals(getId(), answer.getId());
     }
 
     @Override

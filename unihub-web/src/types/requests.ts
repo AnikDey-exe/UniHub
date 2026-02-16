@@ -1,5 +1,5 @@
 import { EventType } from './event-types';
-import { RegistrationStatus } from './responses';
+import { RegistrationStatus, QuestionType } from './responses';
 
 export interface LoginRequest {
     email: string;
@@ -37,6 +37,23 @@ export interface EventCreateRequest {
     eventEndDateUtc: string;
     eventTimezone: string;
     creatorId: number;
+    questionsJson?: string;
+    maxTickets: number;
+    requiresApproval: boolean;
+    approvalSuccessMessage?: string;
+}
+
+export interface QuestionRequest {
+    question: string;
+    type: QuestionType;
+    choices: string[];
+    required: boolean;
+}
+
+export interface AnswerRequest {
+    questionId: number;
+    singleAnswer?: string;
+    multiAnswer?: string[];
 }
 
 export interface EventUpdateRequest {
@@ -73,4 +90,5 @@ export interface RSVPRequest {
     displayName?: string;
     tickets?: number;
     status?: RegistrationStatus;
+    answers?: AnswerRequest[];
 }

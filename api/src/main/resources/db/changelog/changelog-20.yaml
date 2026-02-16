@@ -1,0 +1,95 @@
+databaseChangeLog:
+- changeSet:
+    id: 1768349112077-1
+    author: anikdey (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: answerPK
+            name: id
+            type: INTEGER
+        - column:
+            name: multi_answer
+            type: TEXT[]
+        - column:
+            name: single_answer
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: question_id
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: registration_id
+            type: INTEGER
+        tableName: answer
+- changeSet:
+    id: 1768349112077-2
+    author: anikdey (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: questionPK
+            name: id
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: choices
+            type: TEXT[]
+        - column:
+            constraints:
+              nullable: false
+            name: question
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: required
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: type
+            type: SMALLINT
+        - column:
+            constraints:
+              nullable: false
+            name: event_id
+            type: INTEGER
+        tableName: question
+#- changeSet:
+#    id: 1768349112077-3
+#    author: anikdey (generated)
+#    changes:
+#    - addColumn:
+#        columns:
+#        - column:
+#            constraints:
+#              nullable: false
+#            name: max_tickets
+#            type: INTEGER
+#        tableName: event
+#- changeSet:
+#    id: 1768349112077-4
+#    author: anikdey (generated)
+#    changes:
+#    - addColumn:
+#        columns:
+#        - column:
+#            name: requires_approval
+#            type: BOOLEAN
+#        tableName: event
+

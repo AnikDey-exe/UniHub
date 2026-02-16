@@ -43,6 +43,10 @@ export interface Event {
     eventTimezone: string;
     creator?: UserSummary;
     attendees?: Registration[];
+    maxTickets: number;
+    requiresApproval: boolean;
+    questions?: Question[];
+    approvalSuccessMessage?: string;
 }
 
 export interface EventSearchResponse {
@@ -64,6 +68,9 @@ export interface EventSummary {
     eventStartDateUtc: string;
     eventEndDateUtc: string;
     eventTimezone: string;
+    maxTickets: number;
+    requiresApproval: boolean;
+    approvalSuccessMessage?: string;
 }
 
 export interface College {
@@ -94,6 +101,37 @@ export interface Registration {
     status: RegistrationStatus;
     event: EventSummary;
     attendee: UserSummary;
+    answers?: Answer[];
+}
+
+export interface IsRegisteredResponse {
+    exists: boolean;
+    id: number | null;
+    displayName: string | null;
+    status: RegistrationStatus | null;
+}
+
+export interface RegistrationSummary {
+    id: number;
+    displayName: string;
+    tickets: number;
+    status: RegistrationStatus;
+}
+
+export interface Answer {
+    id: number;
+    singleAnswer?: string;
+    multiAnswer?: string[];
+    question: Question;
+    registration: RegistrationSummary;
+}
+
+export interface Question {
+    id: number;
+    question: string;
+    type: QuestionType;
+    choices?: string[];
+    required: boolean;
 }
 
 export enum RegistrationStatus {
@@ -101,4 +139,10 @@ export enum RegistrationStatus {
     APPROVED = 'APPROVED',
     REJECTED = 'REJECTED',
     CANCELLED = 'CANCELLED',
+}
+
+export enum QuestionType {
+    TYPED = 'TYPED',
+    CHOICE = 'CHOICE',
+    MULTISELECT = 'MULTISELECT'
 }

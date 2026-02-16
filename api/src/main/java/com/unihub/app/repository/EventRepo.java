@@ -1,5 +1,6 @@
 package com.unihub.app.repository;
 
+import com.unihub.app.dto.EventDTO;
 import com.unihub.app.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepo extends JpaRepository<Event, Integer> {
 //    List<Event> findByName(String name);

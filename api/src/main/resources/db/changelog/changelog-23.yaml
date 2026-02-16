@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1768350771222-1
+    author: anikdey (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: approval_success_message
+            type: VARCHAR(255)
+        tableName: event
+

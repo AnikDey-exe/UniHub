@@ -4,8 +4,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck } from "lucide-react"
+import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck, Ticket, ShieldCheck } from "lucide-react"
 import { Event, RegistrationStatus } from "@/types/responses"
+import { AnswerRequest } from "@/types/requests"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { formatEventDate } from "@/utils/formatEventDate"
 import { useCurrentUser } from "@/context/user-context"
@@ -13,6 +14,7 @@ import { useRSVP } from "@/hooks/use-rsvp"
 import { useUnRSVP } from "@/hooks/use-unrsvp"
 import { useEvent } from "@/hooks/use-event"
 import { useRecommendedEvents } from "@/hooks/use-recommended-events"
+import { useIsRegistered } from "@/hooks/use-is-registered"
 import { EventCard } from "@/components/ui/event-card"
 import { Loading } from "@/components/ui/loading"
 import { AttendeesList } from "@/components/ui/attendee-card"
@@ -29,24 +31,24 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const rsvpMutation = useRSVP(event.id)
   const unrsvpMutation = useUnRSVP(event.id)
   const { data: recommendedEvents, isLoading: isLoadingRecommended } = useRecommendedEvents(event.id)
+  const { data: isRegisteredResponse } = useIsRegistered(event.id, user?.id)
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
 
   // Calculate total attendees count from registrations (sum of tickets)
-  const attendeesCount = eventData?.attendees?.reduce((sum, registration) => sum + registration.tickets, 0) || 0
+  const attendeesCount = eventData?.numAttendees || 0
   
   const university = eventData?.creator 
     ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
     : 'University'
 
-  // Find user's registration to get display name
-  const userRegistration = user && eventData?.attendees?.find(
-    registration => registration.attendee.email === user.email
-  )
-  const isRegistered = !!userRegistration
+  const isRegistered = isRegisteredResponse?.exists === true
+  const registrationId = isRegisteredResponse?.id != null && isRegisteredResponse.id !== -1 ? isRegisteredResponse.id : null
+  const displayName = isRegisteredResponse?.displayName ?? null
+  const registrationStatus = isRegisteredResponse?.status ?? null
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
-  const handleRegister = (displayName: string, tickets: number) => {
+  const handleRegister = (displayName: string, tickets: number, answers?: AnswerRequest[]) => {
     if (!user) {
       router.push('/login')
       return
@@ -71,7 +73,8 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           userEmail: user.email,
           displayName: displayName.trim(),
           tickets: ticketsNumber,
-          status: RegistrationStatus.APPROVED,
+          status: eventData?.requiresApproval ? RegistrationStatus.PENDING : RegistrationStatus.APPROVED,
+          answers,
         },
         token,
       },
@@ -121,9 +124,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusIcon = () => {
-    if (!userRegistration) return null
-    switch (userRegistration.status) {
+  const getStatusIcon = (status: RegistrationStatus | null) => {
+    if (status == null) return null
+    switch (status) {
       case RegistrationStatus.PENDING:
         return <Clock className="h-4 w-4" />
       case RegistrationStatus.APPROVED:
@@ -137,9 +140,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusText = () => {
-    if (!userRegistration) return ''
-    switch (userRegistration.status) {
+  const getStatusText = (status: RegistrationStatus | null) => {
+    if (status == null) return ''
+    switch (status) {
       case RegistrationStatus.PENDING:
         return 'Pending'
       case RegistrationStatus.APPROVED:
@@ -153,9 +156,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusColor = () => {
-    if (!userRegistration) return 'text-muted-foreground'
-    switch (userRegistration.status) {
+  const getStatusColor = (status: RegistrationStatus | null) => {
+    if (status == null) return 'text-muted-foreground'
+    switch (status) {
       case RegistrationStatus.PENDING:
         return 'text-yellow-600'
       case RegistrationStatus.APPROVED:
@@ -237,6 +240,30 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                   </div>
                 </div>
               )}
+
+              {eventData && eventData.maxTickets > 0 && (
+                <div className="flex items-center gap-3 text-foreground">
+                  <Ticket className="h-5 w-5 flex-shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-base">Max Tickets per Registration</span>
+                    <span className="text-sm text-muted-foreground">
+                      Up to {eventData.maxTickets} ticket{eventData.maxTickets !== 1 ? 's' : ''} per person
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {eventData && (
+                <div className="flex items-center gap-3 text-foreground">
+                  <ShieldCheck className="h-5 w-5 flex-shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-base">Approval Required</span>
+                    <span className="text-sm text-muted-foreground">
+                      {eventData.requiresApproval ? 'Yes - Registration requires organizer approval' : 'No - Registration is automatic'}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -254,15 +281,24 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                       ? 'Unregister' 
                       : 'Register'}
               </Button>
-              {isRegistered && userRegistration && (
+              {isRegistered && (displayName != null || registrationStatus != null || registrationId != null) && (
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    Registered as {userRegistration.displayName}
-                  </p>
-                  <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor()}`}>
-                    {getStatusIcon()}
-                    <span>{getStatusText()}</span>
-                  </div>
+                  {registrationId != null && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Registration #{registrationId}
+                    </p>
+                  )}
+                  {displayName != null && (
+                    <p className="text-sm text-muted-foreground">
+                      Registered as {displayName}
+                    </p>
+                  )}
+                  {registrationStatus != null && (
+                    <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor(registrationStatus)}`}>
+                      {getStatusIcon(registrationStatus)}
+                      <span>{getStatusText(registrationStatus)}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -276,10 +312,17 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
           </p>
         </div>
 
-        {isCreator && eventData?.attendees !== undefined && (
+        {isCreator && (
           <div className="mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">Attendees ({attendeesCount})</h2>
-            <AttendeesList attendees={eventData.attendees} />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold">Attendees ({attendeesCount})</h2>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/events/${event.id}/attendees`)}
+              >
+                View All
+              </Button>
+            </div>
           </div>
         )}
 
@@ -311,6 +354,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
         open={isRegistrationModalOpen}
         onOpenChange={setIsRegistrationModalOpen}
         user={user}
+        questions={eventData?.questions}
         onSubmit={handleRegister}
         isPending={rsvpMutation.isPending}
       />

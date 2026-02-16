@@ -1,20 +1,18 @@
 package com.unihub.app.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unihub.app.dto.DTOMapper;
 import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
-import com.unihub.app.dto.request.CreateEventRequest;
-import com.unihub.app.dto.request.EventSearchRequest;
-import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.RegistrationDTO;
+import com.unihub.app.dto.request.*;
+import com.unihub.app.dto.response.RegisteredResponse;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
-import com.unihub.app.model.AppUser;
-import com.unihub.app.model.Event;
-import com.unihub.app.model.Registration;
-import com.unihub.app.model.RegistrationStatus;
-import com.unihub.app.repository.AppUserRepo;
-import com.unihub.app.repository.EventRepo;
-import com.unihub.app.repository.RegistrationRepo;
+import com.unihub.app.model.*;
+import com.unihub.app.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +29,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.unihub.app.util.ArrayOperations.toPostgresArray;
 import static com.unihub.app.util.FileOperations.getFileExtension;
 
 @Service
@@ -43,6 +43,10 @@ public class EventService {
     private AppUserRepo appUserRepo;
     @Autowired
     private RegistrationRepo registrationRepo;
+    @Autowired
+    private QuestionRepo questionRepo;
+    @Autowired
+    private AnswerRepo answerRepo;
     @Autowired
     private DTOMapper dtoMapper;
     @Autowired
@@ -203,8 +207,58 @@ public class EventService {
     public EventDTO getEvent(Integer eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
         EventDTO eventDto = dtoMapper.toEventDTO(event);
-
         return eventDto;
+    }
+
+    public List<RegistrationDTO> getEventRegistrations(Integer eventId) {
+        Event event = eventRepo.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found"));
+        List<Registration> registrations = registrationRepo.findAllByEvent(event);
+        List<RegistrationDTO> registrationDtos = new ArrayList<>();
+        for (Registration registration : registrations) registrationDtos.add(dtoMapper.toRegistrationDTO(registration));
+
+        return registrationDtos;
+    }
+
+    @Transactional
+    public RegistrationDTO updateRegistrationStatus(Integer registrationId, RegistrationStatus newStatus) {
+        Registration registration = registrationRepo.findById(registrationId).orElseThrow(() -> new RegistrationNotFoundException("Registration not found"));
+
+        RegistrationStatus oldStatus = registration.getStatus();
+        registration.setStatus(newStatus);
+        registrationRepo.save(registration);
+
+        Event event = registration.getEvent();
+        if (oldStatus == RegistrationStatus.APPROVED && List.of(RegistrationStatus.REJECTED, RegistrationStatus.CANCELLED, RegistrationStatus.PENDING).contains(newStatus)) {
+            em.detach(event);
+            em.createNativeQuery("""
+                                       UPDATE events.event
+                                       SET num_attendees = num_attendees - :tickets
+                                       WHERE id = :eventId
+                               """)
+                    .setParameter("tickets", registration.getTickets())
+                    .setParameter("eventId", event.getId())
+                    .executeUpdate();
+            event.setNumAttendees(event.getNumAttendees() - registration.getTickets());
+        } else if (List.of(RegistrationStatus.REJECTED, RegistrationStatus.CANCELLED, RegistrationStatus.PENDING).contains(oldStatus) && newStatus == RegistrationStatus.APPROVED) {
+            if (event.getNumAttendees() < event.getCapacity() && event.getNumAttendees() + registration.getTickets() < event.getCapacity()) {
+                em.detach(event);
+                em.createNativeQuery("""
+                                       UPDATE events.event
+                                       SET num_attendees = num_attendees + :tickets
+                                       WHERE id = :eventId
+                                """)
+                        .setParameter("tickets", registration.getTickets())
+                        .setParameter("eventId", event.getId())
+                        .executeUpdate();
+                event.setNumAttendees(event.getNumAttendees() + registration.getTickets());
+            }
+        }
+        return dtoMapper.toRegistrationDTO(registration);
+    }
+
+    public RegisteredResponse isRegistered(Integer eventId, Integer attendeeUserId) {
+        Optional<Registration> registration = registrationRepo.findByEventIdAndAttendeeId(eventId, attendeeUserId);
+        return new RegisteredResponse(registration.isPresent(), registration.map(Registration::getId).orElse(-1), registration.map(Registration::getDisplayName).orElse(null), registration.map(Registration::getStatus).orElse(null));
     }
 
 //    fix
@@ -221,7 +275,9 @@ public class EventService {
         return dtoMapper.toEventDTO(updatedEvent);
     }
 
-    public EventDTO saveEvent(CreateEventRequest eventRequest, MultipartFile image) throws FileUploadException {
+    // update to support questions
+    @Transactional
+    public EventDTO saveEvent(CreateEventRequest eventRequest, MultipartFile image) throws FileUploadException, JsonProcessingException {
         AppUser user = null;
         user = appUserRepo.findById(eventRequest.getCreatorId())
                     .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -236,11 +292,14 @@ public class EventService {
         event.setCapacity(eventRequest.getCapacity());
         event.setEventStartDateUtc(eventRequest.getEventStartDateUtc());
         event.setEventEndDateUtc(eventRequest.getEventEndDateUtc());
+        event.setMaxTickets(eventRequest.getMaxTickets());
+        event.setRequiresApproval(eventRequest.isRequiresApproval());
+        event.setApprovalSuccessMessage(eventRequest.getApprovalSuccessMessage());
 
-        if (user != null) {
-            event.setCreator(user);
-            user.getEventsCreated().add(event);
-        }
+//        if (user != null) {
+//            event.setCreator(user);
+//            user.getEventsCreated().add(event);
+//        }
 
         String thumbnail = "";
 
@@ -309,12 +368,12 @@ public class EventService {
             INSERT INTO events.event (
                 name, type, description, location, capacity, image,
                 num_attendees, event_start_date_utc, event_end_date_utc,
-                event_timezone, creator_user_id, embedding
+                event_timezone, creator_user_id, max_tickets, requires_approval, approval_success_message, embedding
             )
             VALUES (
                 :name, :type, :description, :location, :capacity, :image,
                 :numAttendees, :startDate, :endDate,
-                :timezone, :creatorId, '%s'::vector
+                :timezone, :creatorId, :maxTickets, :requiresApproval, :approvalSuccessMessage, '%s'::vector
             )
             RETURNING id
             """, embeddingLiteral);
@@ -331,17 +390,52 @@ public class EventService {
                 .setParameter("endDate", event.getEventEndDateUtc())
                 .setParameter("timezone", event.getEventTimezone())
                 .setParameter("creatorId", user != null ? user.getId() : null)
+                .setParameter("maxTickets", event.getMaxTickets())
+                .setParameter("requiresApproval", event.isRequiresApproval())
+                .setParameter("approvalSuccessMessage", event.getApprovalSuccessMessage())
                 .getSingleResult();
 
-        event.setId(generatedId);
-        EventDTO eventDTO = dtoMapper.toEventDTO(event);
-        log.info("Event with id: {} saved successfully", event.getName());
+        em.flush();
+        em.clear(); // Clear the persistence context
+
+// Now fetch it again to get a truly fresh managed entity
+        Event managedEvent = em.find(Event.class, generatedId);
+
+        if (eventRequest.getQuestionsJson() != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            List<QuestionRequest> questions = mapper.readValue(
+                    eventRequest.getQuestionsJson(),
+                    new TypeReference<List<QuestionRequest>>() {
+                    }
+            );
+
+            List<Question> questionEntities = questions.stream()
+                    .map(qr -> {
+                        Question q = new Question();
+                        q.setQuestion(qr.getQuestion());
+                        q.setType(qr.getType());
+                        q.setChoices(qr.getChoices().toArray(new String[0]));
+                        q.setRequired(qr.isRequired());
+                        q.setEvent(managedEvent); // important
+                        return q;
+                    })
+                    .toList();
+
+            for (Question q : questionEntities) {
+                questionRepo.save(q);
+            }
+
+            questionRepo.saveAll(questionEntities);
+        }
+
+        EventDTO eventDTO = dtoMapper.toEventDTO(managedEvent);
+        log.info("Event with id: {} saved successfully", managedEvent.getName());
         return eventDTO;
     }
 
-    // change to registration
+    // update to support answers
     @Transactional
-    public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status) {
+    public void rsvpEvent(Integer eventId, String userEmail, String displayName, Integer tickets, RegistrationStatus status, List<AnswerRequest> answers) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
         AppUser attendee = appUserRepo.findByEmail(userEmail)
@@ -349,6 +443,7 @@ public class EventService {
 
         if (event.getNumAttendees() >= event.getCapacity()) throw new CapacityLimitReachedException("Event is at full capacity");
         if (event.getNumAttendees() + tickets > event.getCapacity()) throw new CapacityLimitReachedException("Event does not have enough capacity for the number of tickets you requested");
+        if (tickets > event.getMaxTickets()) throw new CapacityLimitReachedException("You can only request up to "+event.getMaxTickets()+" tickets");
 
         boolean alreadyRegistered = em.createQuery("""
             SELECT COUNT(r)
@@ -361,6 +456,21 @@ public class EventService {
 
         if (alreadyRegistered) throw new UserAlreadyRegisteredException("User is already registered for event");
 
+        if (event.getQuestions() != null) {
+            List<Integer> requiredQuestionIds =
+                    event.getQuestions().stream()
+                            .filter(Question::isRequired)
+                            .map(Question::getId)
+                            .toList();
+            Set<Integer> answeredQuestionIds = answers == null ? Set.of() :
+                    answers.stream()
+                            .map(AnswerRequest::getQuestionId)
+                            .collect(Collectors.toSet());
+            if (!answeredQuestionIds.containsAll(requiredQuestionIds)) {
+                throw new MissingRequiredAnswersException("All required questions must be answered");
+            }
+        }
+
         Registration registration = new Registration();
         registration.setEvent(event);
         registration.setAttendee(attendee);
@@ -368,10 +478,42 @@ public class EventService {
         registration.setTickets(tickets);
         registration.setStatus(status);
 
-        em.detach(event);
         registrationRepo.save(registration);
 
+        if (answers != null) {
+            for (AnswerRequest ar : answers) {
+                Question question = questionRepo.findById(ar.getQuestionId())
+                        .orElseThrow(() ->
+                                new QuestionNotFoundException("Invalid question")
+                        );
+
+                if (!question.getEvent().getId().equals(eventId)) {
+                    throw new IllegalArgumentException("Question does not belong to this event");
+                }
+
+                if ((question.getType() == QuestionType.MULTISELECT && ar.getMultiAnswer() == null)
+                        || (
+                                (question.getType() == QuestionType.CHOICE || question.getType() == QuestionType.TYPED) && ar.getSingleAnswer() == null)
+                            ) {
+                    throw new InvalidAnswerException("Your answers are invalid, please check it again");
+                }
+
+                Answer answer = new Answer();
+                answer.setRegistration(registration);
+                answer.setQuestion(question);
+                answer.setSingleAnswer(ar.getSingleAnswer());
+                answer.setMultiAnswer(
+                        ar.getMultiAnswer() != null
+                                ? ar.getMultiAnswer().toArray(new String[0])
+                                : null
+                );
+
+                answerRepo.save(answer);
+            }
+        }
+
         if (status == RegistrationStatus.APPROVED) {
+            em.detach(event);
             em.createNativeQuery("""
                    UPDATE events.event
                    SET num_attendees = num_attendees + :tickets
@@ -383,14 +525,10 @@ public class EventService {
             event.setNumAttendees(event.getNumAttendees() + tickets);
         }
 
-//        event.getAttendees().add(registration);
-//        attendee.getEventsAttended().add(registration);
-
         EmailDTO email = new EmailDTO(userEmail, "You have been registered for "+event.getName()+"! Check your registration status in your profile to see if it got approved.", "Registration Confirmation");
         emailService.sendSimpleEmailAsync(email);
     }
 
-    // change to registration
     @Transactional
     public void unrsvpEvent(Integer eventId, String userEmail) {
         Event event = eventRepo.findById(eventId)

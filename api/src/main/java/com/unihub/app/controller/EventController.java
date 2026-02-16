@@ -1,12 +1,13 @@
 package com.unihub.app.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.app.dto.EventDTO;
-import com.unihub.app.dto.request.CreateEventRequest;
-import com.unihub.app.dto.request.EventSearchRequest;
-import com.unihub.app.dto.request.RsvpRequest;
-import com.unihub.app.dto.request.UpdateEventRequest;
+import com.unihub.app.dto.RegistrationDTO;
+import com.unihub.app.dto.request.*;
+import com.unihub.app.dto.response.RegisteredResponse;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.model.Event;
+import com.unihub.app.model.RegistrationStatus;
 import com.unihub.app.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -52,21 +53,30 @@ public class EventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDTO> getEvent(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEvent(eventId)); }
 
+    @GetMapping("/registrations/{eventId}")
+    public ResponseEntity<List<RegistrationDTO>> getEventRegistrations(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getEventRegistrations(eventId)); }
+
     @GetMapping("/recommended/{eventId}")
     public ResponseEntity<List<EventDTO>> getRecommendedEvents(@PathVariable Integer eventId) { return ResponseEntity.ok().body(eventService.getRecommendedEvents(eventId)); }
 
     @PutMapping("/{eventId}")
     public ResponseEntity<EventDTO> updateEvent(@PathVariable Integer eventId, @RequestBody UpdateEventRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateEvent(eventId, toUpdate)); }
 
+    @PutMapping("/update-registration-status/{registrationId}")
+    public ResponseEntity<RegistrationDTO> updateRegistrationStatus(@PathVariable Integer registrationId, @RequestBody UpdateRegistrationRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateRegistrationStatus(registrationId, toUpdate.getNewStatus())); }
+
+    @GetMapping("/is-registered/{eventId}/{userId}")
+    public ResponseEntity<RegisteredResponse> isRegistered(@PathVariable Integer eventId, @PathVariable Integer userId) { return ResponseEntity.ok().body(eventService.isRegistered(eventId, userId)); }
+
     @PostMapping("/create")
-    public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException {
+    public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException, JsonProcessingException {
         return ResponseEntity.ok().body(eventService.saveEvent(event, image));
     }
 
     // change to registration
     @PostMapping("/rsvp")
     public ResponseEntity<Void> rsvpEvent(@RequestBody RsvpRequest rsvpBody) {
-        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail(), rsvpBody.getDisplayName(), rsvpBody.getTickets(), rsvpBody.getStatus());
+        eventService.rsvpEvent(rsvpBody.getEventId(), rsvpBody.getUserEmail(), rsvpBody.getDisplayName(), rsvpBody.getTickets(), rsvpBody.getStatus(), rsvpBody.getAnswers());
         return ResponseEntity.ok().build();
     }
 

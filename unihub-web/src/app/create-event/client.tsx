@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { ImageIcon, X } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { ImageIcon, X, HelpCircle } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { PageLoading } from "@/components/ui/loading"
-import { EventCreateRequest } from "@/types/requests"
+import { EventCreateRequest, QuestionRequest } from "@/types/requests"
 import { EVENT_TYPE_OPTIONS } from "@/types/event-types"
+import { QuestionsModal } from "./components/questions-modal"
 import { DateTimePicker } from '@mantine/dates'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -39,10 +41,11 @@ export function CreateEventClient() {
   const router = useRouter()
   const createEventMutation = useCreateEvent()
 
-  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creatorId' | 'image'> & {
+  const [formData, setFormData] = useState<Omit<EventCreateRequest, 'eventStartDateUtc' | 'eventEndDateUtc' | 'creatorId' | 'image' | 'maxTickets'> & {
     startDate: Date | null
     endDate: Date | null
     image: File | null
+    maxTickets: string
   }>({
     name: "",
     type: "",
@@ -52,10 +55,15 @@ export function CreateEventClient() {
     eventTimezone: "EST",
     startDate: null,
     endDate: null,
-    image: null
+    image: null,
+    maxTickets: "1",
+    requiresApproval: false,
+    approvalSuccessMessage: ""
   })
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [questions, setQuestions] = useState<QuestionRequest[]>([])
+  const [questionsModalOpen, setQuestionsModalOpen] = useState(false)
 
   const [errors, setErrors] = useState<Partial<Record<keyof EventCreateRequest, string>>>({})
 
@@ -73,7 +81,7 @@ export function CreateEventClient() {
     return null
   }
 
-  const handleInputChange = (field: keyof typeof formData, value: string | number | Date | null | File) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | number | Date | null | File | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     // Clear error when user starts typing
     if (errors[field as keyof EventCreateRequest]) {
@@ -167,6 +175,14 @@ export function CreateEventClient() {
     formDataToSend.append('eventStartDateUtc', dayjs(formData.startDate).utc().toISOString())
     formDataToSend.append('eventEndDateUtc', dayjs(formData.endDate).utc().toISOString())
     formDataToSend.append('creatorId', user.id.toString())
+    formDataToSend.append('maxTickets', (Number(formData.maxTickets) || 1).toString())
+    formDataToSend.append('requiresApproval', formData.requiresApproval.toString())
+    if (formData.approvalSuccessMessage) {
+      formDataToSend.append('approvalSuccessMessage', formData.approvalSuccessMessage)
+    }
+    if (questions.length > 0) {
+      formDataToSend.append('questionsJson', JSON.stringify(questions))
+    }
     
     if (formData.image) {
       formDataToSend.append('image', formData.image)
@@ -384,6 +400,118 @@ export function CreateEventClient() {
                   <p className="text-sm text-destructive">{errors.eventTimezone}</p>
                 )}
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="maxTickets">Max Tickets per Registration</Label>
+                  <Input
+                    id="maxTickets"
+                    type="number"
+                    min="1"
+                    placeholder="1"
+                    value={formData.maxTickets}
+                    onChange={(e) => {
+                      const inputValue = e.target.value
+                      // Allow empty string while typing
+                      if (inputValue === "") {
+                        handleInputChange("maxTickets", "")
+                        return
+                      }
+                      // Only allow positive integers
+                      const numValue = parseInt(inputValue, 10)
+                      if (!isNaN(numValue) && numValue > 0) {
+                        handleInputChange("maxTickets", inputValue)
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Ensure we have a valid value on blur
+                      const numValue = parseInt(e.target.value, 10)
+                      if (isNaN(numValue) || numValue < 1) {
+                        handleInputChange("maxTickets", "1")
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="requiresApproval">Require Approval</Label>
+                    <Switch
+                      id="requiresApproval"
+                      checked={formData.requiresApproval}
+                      onCheckedChange={(checked) => handleInputChange("requiresApproval", checked)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, registrations require approval before being confirmed
+                  </p>
+                </div>
+              </div>
+
+              {formData.requiresApproval && (
+                <div className="space-y-2">
+                  <Label htmlFor="approvalSuccessMessage">Approval Success Message</Label>
+                  <Textarea
+                    id="approvalSuccessMessage"
+                    placeholder="Message to show when registration is approved (optional)"
+                    value={formData.approvalSuccessMessage}
+                    onChange={(e) => handleInputChange("approvalSuccessMessage", e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Registration Questions</Label>
+                <Card
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setQuestionsModalOpen(true)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">
+                            {questions.length === 0
+                              ? "No questions added"
+                              : `${questions.length} question${questions.length === 1 ? "" : "s"} added`}
+                          </p>
+                          {questions.length > 0 && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {questions.slice(0, 3).map((q, i) => (
+                                <span key={i}>
+                                  {q.question || "Untitled question"}
+                                  {i < Math.min(questions.length, 3) - 1 && ", "}
+                                </span>
+                              ))}
+                              {questions.length > 3 && ` and ${questions.length - 3} more...`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setQuestionsModalOpen(true)
+                        }}
+                      >
+                        {questions.length === 0 ? "Add Questions" : "Edit Questions"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <QuestionsModal
+                open={questionsModalOpen}
+                onOpenChange={setQuestionsModalOpen}
+                questions={questions}
+                onQuestionsChange={setQuestions}
+              />
 
               <div className="flex justify-end pt-4">
                 <Button

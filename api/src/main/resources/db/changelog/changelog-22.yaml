@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 22
+      author: anikdey
+      preConditions:
+        - not:
+            columnExists:
+              tableName: event
+              columnName: max_tickets
+      changes:
+        - addColumn:
+            tableName: event
+            columns:
+              - column:
+                  name: max_tickets
+                  type: INTEGER
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: requires_approval
+                  type: BOOLEAN

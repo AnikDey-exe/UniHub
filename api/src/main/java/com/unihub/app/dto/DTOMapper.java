@@ -1,11 +1,8 @@
 package com.unihub.app.dto;
 
 import com.unihub.app.dto.request.UpdateUserRequest;
-import com.unihub.app.model.AppUser;
-import com.unihub.app.model.College;
-import com.unihub.app.model.Event;
+import com.unihub.app.model.*;
 
-import com.unihub.app.model.Registration;
 import org.hibernate.sql.Update;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,7 +15,9 @@ public interface DTOMapper {
 
     // Event -> EventDTO
     @Mapping(target = "creator", source = "creator")
-    @Mapping(target = "attendees", source = "attendees")
+//    @Mapping(target = "attendees", source = "attendees")
+    @Mapping(target = "questions", source = "questions")
+    @Mapping(target = "requiresApproval", source = "requiresApproval")
     EventDTO toEventDTO(Event event);
 
     // AppUser -> AppUserDTO
@@ -32,13 +31,21 @@ public interface DTOMapper {
 
     @Mapping(target = "attendee", source = "attendee")
     @Mapping(target = "event", source = "event")
+    @Mapping(target = "answers", source = "answers")
     RegistrationDTO toRegistrationDTO(Registration registration);
+
+    QuestionDTO toQuestionDTO(Question question);
+
+    @Mapping(target = "question", source = "question")
+    @Mapping(target = "registration", source = "registration")
+    AnswerDTO toAnswerDTO(Answer answer);
 
     // Smaller objects
     AppUserSummaryDTO toAppUserSummaryDTO(AppUser appUser);
 
     List<AppUserSummaryDTO> toAppSummaryDTO(List<AppUser> appUsers);
 
+    @Mapping(target = "requiresApproval", source = "requiresApproval")
     EventSummaryDTO toEventSummaryDTO(Event event);
 
     List<EventSummaryDTO> toEventSummaryDTO(List<Event> events);
