@@ -102,10 +102,13 @@ export function AttendeeCard({ registration, canUpdateStatus = false, eventId, c
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h3 className="font-semibold text-base text-foreground line-clamp-1">
                 {nameToDisplay}
               </h3>
+              <span className="text-xs text-muted-foreground font-mono">
+                #{registration.id}
+              </span>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-1">
               {attendee.email}
@@ -227,11 +230,13 @@ export function AttendeesList({ attendees, canUpdateStatus = false, eventId, cla
     }
 
     const query = searchQuery.toLowerCase().trim()
+    const queryNum = searchQuery.trim()
     return attendees.filter((registration) => {
       const displayName = registration.displayName.toLowerCase()
       const fullName = `${registration.attendee.firstName} ${registration.attendee.lastName}`.toLowerCase()
       const email = registration.attendee.email.toLowerCase()
-      return displayName.includes(query) || fullName.includes(query) || email.includes(query)
+      const idMatch = String(registration.id) === queryNum || String(registration.id).includes(queryNum)
+      return displayName.includes(query) || fullName.includes(query) || email.includes(query) || idMatch
     })
   }, [attendees, searchQuery])
 
@@ -248,7 +253,7 @@ export function AttendeesList({ attendees, canUpdateStatus = false, eventId, cla
       <div className="relative w-full max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by name or email"
+          placeholder="Search by name, email, or ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"

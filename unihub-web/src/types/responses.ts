@@ -106,6 +106,7 @@ export interface Registration {
 
 export interface IsRegisteredResponse {
     exists: boolean;
+    id: number | null;
     displayName: string | null;
     status: RegistrationStatus | null;
 }

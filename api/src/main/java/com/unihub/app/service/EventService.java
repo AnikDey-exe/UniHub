@@ -258,7 +258,7 @@ public class EventService {
 
     public RegisteredResponse isRegistered(Integer eventId, Integer attendeeUserId) {
         Optional<Registration> registration = registrationRepo.findByEventIdAndAttendeeId(eventId, attendeeUserId);
-        return new RegisteredResponse(registration.isPresent(), registration.map(Registration::getDisplayName).orElse(null), registration.map(Registration::getStatus).orElse(null));
+        return new RegisteredResponse(registration.isPresent(), registration.map(Registration::getId).orElse(-1), registration.map(Registration::getDisplayName).orElse(null), registration.map(Registration::getStatus).orElse(null));
     }
 
 //    fix

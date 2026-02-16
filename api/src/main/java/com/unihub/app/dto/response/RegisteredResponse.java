@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegisteredResponse {
     private boolean exists;
+    private int id;
     private String displayName;
     private RegistrationStatus status;
 }

@@ -42,6 +42,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     : 'University'
 
   const isRegistered = isRegisteredResponse?.exists === true
+  const registrationId = isRegisteredResponse?.id != null && isRegisteredResponse.id !== -1 ? isRegisteredResponse.id : null
   const displayName = isRegisteredResponse?.displayName ?? null
   const registrationStatus = isRegisteredResponse?.status ?? null
 
@@ -280,8 +281,13 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                       ? 'Unregister' 
                       : 'Register'}
               </Button>
-              {isRegistered && (displayName != null || registrationStatus != null) && (
+              {isRegistered && (displayName != null || registrationStatus != null || registrationId != null) && (
                 <div className="space-y-1">
+                  {registrationId != null && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Registration #{registrationId}
+                    </p>
+                  )}
                   {displayName != null && (
                     <p className="text-sm text-muted-foreground">
                       Registered as {displayName}
