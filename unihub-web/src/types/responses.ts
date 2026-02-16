@@ -104,9 +104,10 @@ export interface Registration {
     answers?: Answer[];
 }
 
-/** Response from GET /api/events/is-registered/{eventId}/{userId} */
 export interface IsRegisteredResponse {
     exists: boolean;
+    displayName: string | null;
+    status: RegistrationStatus | null;
 }
 
 export interface RegistrationSummary {

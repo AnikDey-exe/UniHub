@@ -15,4 +15,6 @@ public interface RegistrationRepo extends JpaRepository<Registration, Integer>  
     List<Registration> findAllByEvent(Event event);
 
     boolean existsByEventIdAndAttendeeId(Integer eventId, Integer attendeeId);
+
+    Optional<Registration> findByEventIdAndAttendeeId(Integer eventId, Integer attendeeId);
 }

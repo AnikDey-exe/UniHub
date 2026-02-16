@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck, Ticket, ShieldCheck } from "lucide-react"
-import { Event, Registration, RegistrationStatus } from "@/types/responses"
+import { Event, RegistrationStatus } from "@/types/responses"
 import { AnswerRequest } from "@/types/requests"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { formatEventDate } from "@/utils/formatEventDate"
@@ -42,8 +42,8 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     : 'University'
 
   const isRegistered = isRegisteredResponse?.exists === true
-  // Backend is-registered endpoint only returns { exists }; full registration details not available here
-  const userRegistration: Registration | null = null
+  const displayName = isRegisteredResponse?.displayName ?? null
+  const registrationStatus = isRegisteredResponse?.status ?? null
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
@@ -123,9 +123,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusIcon = (reg: Registration | null) => {
-    if (!reg) return null
-    switch (reg.status) {
+  const getStatusIcon = (status: RegistrationStatus | null) => {
+    if (status == null) return null
+    switch (status) {
       case RegistrationStatus.PENDING:
         return <Clock className="h-4 w-4" />
       case RegistrationStatus.APPROVED:
@@ -139,9 +139,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusText = (reg: Registration | null) => {
-    if (!reg) return ''
-    switch (reg.status) {
+  const getStatusText = (status: RegistrationStatus | null) => {
+    if (status == null) return ''
+    switch (status) {
       case RegistrationStatus.PENDING:
         return 'Pending'
       case RegistrationStatus.APPROVED:
@@ -155,9 +155,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusColor = (reg: Registration | null) => {
-    if (!reg) return 'text-muted-foreground'
-    switch (reg.status) {
+  const getStatusColor = (status: RegistrationStatus | null) => {
+    if (status == null) return 'text-muted-foreground'
+    switch (status) {
       case RegistrationStatus.PENDING:
         return 'text-yellow-600'
       case RegistrationStatus.APPROVED:
@@ -280,15 +280,19 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
                       ? 'Unregister' 
                       : 'Register'}
               </Button>
-              {isRegistered && userRegistration && (
+              {isRegistered && (displayName != null || registrationStatus != null) && (
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    Registered as {(userRegistration as Registration).displayName}
-                  </p>
-                  <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor(userRegistration)}`}>
-                    {getStatusIcon(userRegistration)}
-                    <span>{getStatusText(userRegistration)}</span>
-                  </div>
+                  {displayName != null && (
+                    <p className="text-sm text-muted-foreground">
+                      Registered as {displayName}
+                    </p>
+                  )}
+                  {registrationStatus != null && (
+                    <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor(registrationStatus)}`}>
+                      {getStatusIcon(registrationStatus)}
+                      <span>{getStatusText(registrationStatus)}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

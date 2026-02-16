@@ -1,5 +1,6 @@
 package com.unihub.app.dto.response;
 
+import com.unihub.app.model.RegistrationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,4 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegisteredResponse {
     private boolean exists;
+    private String displayName;
+    private RegistrationStatus status;
 }
