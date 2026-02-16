@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Users, Clock, CheckCircle2, XCircle, Ban, Calendar, CalendarClock, UserCheck, Ticket, ShieldCheck } from "lucide-react"
-import { Event, RegistrationStatus } from "@/types/responses"
+import { Event, Registration, RegistrationStatus } from "@/types/responses"
 import { AnswerRequest } from "@/types/requests"
 import { formatAttendees } from "@/utils/formatAttendees"
 import { formatEventDate } from "@/utils/formatEventDate"
@@ -14,6 +14,7 @@ import { useRSVP } from "@/hooks/use-rsvp"
 import { useUnRSVP } from "@/hooks/use-unrsvp"
 import { useEvent } from "@/hooks/use-event"
 import { useRecommendedEvents } from "@/hooks/use-recommended-events"
+import { useIsRegistered } from "@/hooks/use-is-registered"
 import { EventCard } from "@/components/ui/event-card"
 import { Loading } from "@/components/ui/loading"
 import { AttendeesList } from "@/components/ui/attendee-card"
@@ -30,6 +31,7 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
   const rsvpMutation = useRSVP(event.id)
   const unrsvpMutation = useUnRSVP(event.id)
   const { data: recommendedEvents, isLoading: isLoadingRecommended } = useRecommendedEvents(event.id)
+  const { data: isRegisteredResponse } = useIsRegistered(event.id, user?.id)
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
 
   // Calculate total attendees count from registrations (sum of tickets)
@@ -39,11 +41,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     ? `${eventData.creator.firstName} ${eventData.creator.lastName}` 
     : 'University'
 
-  // Find user's registration to get display name
-  const userRegistration = user && eventData?.attendees?.find(
-    registration => registration.attendee.email === user.email
-  )
-  const isRegistered = !!userRegistration
+  const isRegistered = isRegisteredResponse?.exists === true
+  // Backend is-registered endpoint only returns { exists }; full registration details not available here
+  const userRegistration: Registration | null = null
 
   const isCreator = user && eventData?.creator && user.id === eventData.creator.id
 
@@ -123,9 +123,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusIcon = () => {
-    if (!userRegistration) return null
-    switch (userRegistration.status) {
+  const getStatusIcon = (reg: Registration | null) => {
+    if (!reg) return null
+    switch (reg.status) {
       case RegistrationStatus.PENDING:
         return <Clock className="h-4 w-4" />
       case RegistrationStatus.APPROVED:
@@ -139,9 +139,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusText = () => {
-    if (!userRegistration) return ''
-    switch (userRegistration.status) {
+  const getStatusText = (reg: Registration | null) => {
+    if (!reg) return ''
+    switch (reg.status) {
       case RegistrationStatus.PENDING:
         return 'Pending'
       case RegistrationStatus.APPROVED:
@@ -155,9 +155,9 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
     }
   }
 
-  const getStatusColor = () => {
-    if (!userRegistration) return 'text-muted-foreground'
-    switch (userRegistration.status) {
+  const getStatusColor = (reg: Registration | null) => {
+    if (!reg) return 'text-muted-foreground'
+    switch (reg.status) {
       case RegistrationStatus.PENDING:
         return 'text-yellow-600'
       case RegistrationStatus.APPROVED:
@@ -283,11 +283,11 @@ export function EventDetailsClient({ event }: EventDetailsClientProps) {
               {isRegistered && userRegistration && (
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">
-                    Registered as {userRegistration.displayName}
+                    Registered as {(userRegistration as Registration).displayName}
                   </p>
-                  <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor()}`}>
-                    {getStatusIcon()}
-                    <span>{getStatusText()}</span>
+                  <div className={`flex items-center gap-2 text-sm font-medium ${getStatusColor(userRegistration)}`}>
+                    {getStatusIcon(userRegistration)}
+                    <span>{getStatusText(userRegistration)}</span>
                   </div>
                 </div>
               )}

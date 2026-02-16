@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.RegistrationDTO;
 import com.unihub.app.dto.request.*;
+import com.unihub.app.dto.response.RegisteredResponse;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.model.Event;
 import com.unihub.app.model.RegistrationStatus;
@@ -63,6 +64,9 @@ public class EventController {
 
     @PutMapping("/update-registration-status/{registrationId}")
     public ResponseEntity<RegistrationDTO> updateRegistrationStatus(@PathVariable Integer registrationId, @RequestBody UpdateRegistrationRequest toUpdate) { return ResponseEntity.ok().body(eventService.updateRegistrationStatus(registrationId, toUpdate.getNewStatus())); }
+
+    @GetMapping("/is-registered/{eventId}/{userId}")
+    public ResponseEntity<RegisteredResponse> isRegistered(@PathVariable Integer eventId, @PathVariable Integer userId) { return ResponseEntity.ok().body(eventService.isRegistered(eventId, userId)); }
 
     @PostMapping("/create")
     public ResponseEntity<EventDTO> saveEvent(@ModelAttribute CreateEventRequest event, @RequestParam(value = "image", required = false) MultipartFile image) throws FileUploadException, JsonProcessingException {

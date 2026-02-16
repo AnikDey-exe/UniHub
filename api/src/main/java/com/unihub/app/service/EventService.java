@@ -8,6 +8,7 @@ import com.unihub.app.dto.EmailDTO;
 import com.unihub.app.dto.EventDTO;
 import com.unihub.app.dto.RegistrationDTO;
 import com.unihub.app.dto.request.*;
+import com.unihub.app.dto.response.RegisteredResponse;
 import com.unihub.app.dto.response.SearchedEventsResponse;
 import com.unihub.app.exception.*;
 import com.unihub.app.model.*;
@@ -253,6 +254,10 @@ public class EventService {
             }
         }
         return dtoMapper.toRegistrationDTO(registration);
+    }
+
+    public RegisteredResponse isRegistered(Integer eventId, Integer attendeeUserId) {
+        return new RegisteredResponse(registrationRepo.existsByEventIdAndAttendeeId(eventId, attendeeUserId));
     }
 
 //    fix

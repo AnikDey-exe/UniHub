@@ -1,5 +1,5 @@
 import { LoginRequest, UserRegisterRequest, EventCreateRequest, EventUpdateRequest, UserUpdateRequest, EventSearchRequest, RSVPRequest, CollegeSearchRequest } from "@/types/requests";
-import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse, Registration, RegistrationStatus } from "@/types/responses";
+import { LoginResponse, User, Event, College, EventSearchResponse, CollegeSearchResponse, Registration, RegistrationStatus, IsRegisteredResponse } from "@/types/responses";
 
 const API_BASE_URL = typeof window === 'undefined' 
 ? process.env.API_URL  // Server-side: use host.docker.internal
@@ -183,6 +183,11 @@ export const eventsAPI = {
     apiFetch<void>(`/api/events/update-registration-status/${registrationId}`, {
       method: 'PUT',
       body: JSON.stringify({ newStatus }),
+    }, token),
+
+  isRegistered: (eventId: number, userId: number, token: string) =>
+    apiFetch<IsRegisteredResponse>(`/api/events/is-registered/${eventId}/${userId}`, {
+      method: 'GET',
     }, token)
 };
 

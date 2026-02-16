@@ -12,6 +12,7 @@ export function useUnRSVP(eventId: number) {
     onSuccess: async () => {
       queryClient.refetchQueries({ queryKey: ['event', eventId] })
       queryClient.invalidateQueries({ queryKey: ['user'] })
+      queryClient.invalidateQueries({ queryKey: ['is-registered', eventId] })
       queryClient.invalidateQueries({ queryKey: ['events-search'] })
       queryClient.invalidateQueries({ queryKey: ['events-infinite-search'] })
     },
