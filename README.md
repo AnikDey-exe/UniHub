@@ -136,7 +136,7 @@ Institutor is the foundation for:
 
 ---
 
-### 🔮 Future Expansion
+### 🔮 Future Expansion for Institutor
 
 Planned enhancements include:
 
@@ -152,6 +152,8 @@ Institutor transforms UniHub from a single-campus product into a scalable univer
 ___
 
 ## 🧠 Core Features
+
+UniHub is possible because of its use of Formiq, Butler, and Institutor. DataSauna is in the planning stage (see roadmap).
 
 ### 👤 User System
 - Secure user registration & authentication
