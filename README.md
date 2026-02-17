@@ -53,6 +53,104 @@ The platform supports:
 
 ---
 
+### 🧩 UniHub Formiq
+
+**UniHub Formiq** is a dynamic event configuration tool that allows event creators to design structured, customizable event experiences.
+
+Formiq enables:
+
+- Custom questionnaire creation for events
+- Dynamic form fields (text, selection, conditional inputs)
+- Structured response storage tied to users
+- Event-specific property extensions
+- Schema-backed customization without breaking relational integrity
+
+Instead of hardcoding event attributes, Formiq allows events to define their own structured data model — making UniHub extensible and adaptable across different event types (hackathons, workshops, conferences, socials, etc.). Formiq is actively undergoing upgrades. Stay tuned!
+
+---
+
+### 🤖 UniHub Butler
+
+**UniHub Butler** is UniHub’s AI-powered discovery and recommendation engine.
+
+Butler provides:
+
+- Intelligent event search
+- Context-aware filtering
+- Two tower query system
+- Personalized recommendations
+- Structured query processing across relational data
+- Scalable foundation for semantic search and ranking systems
+
+Butler transforms UniHub from a static event board into a dynamic discovery platform. Butler is actively undergoing upgrades. Stay tuned!
+
+---
+
+## 🏫 UniHub Institutor
+
+**UniHub Institutor** is UniHub’s institutional identity and onboarding service.
+
+It is responsible for identifying, validating, and associating users with their respective universities — forming the foundation for UniHub’s multi-tenant architecture.
+
+---
+
+### 🎓 Institution Discovery Engine
+
+Institutor maintains a continuously updated dataset of accredited universities and their associated email domains.
+
+Current capabilities:
+
+- Scrapes and consolidates public university data
+- Maps official institutional email domains
+- Maintains normalized institutional records
+- Structured storage of university metadata
+
+---
+
+### 📧 Email-Based Institution Resolution
+
+When a user signs up:
+
+1. Their email domain is extracted.
+2. Institutor matches the domain against verified institutional records.
+3. The user is automatically scoped to their university tenant.
+
+This allows:
+
+- Automatic institutional assignment
+- Scoped event visibility
+- University-level data partitioning
+- Cleaner access control boundaries
+
+---
+
+### 🧠 Architectural Role
+
+Institutor is the foundation for:
+
+- Multi-tenant university support
+- Scoped relational queries
+- Institution-level permissions
+- Future administrative dashboards
+- Cross-campus federation (roadmap)
+
+---
+
+### 🔮 Future Expansion
+
+Planned enhancements include:
+
+- Institution verification workflows
+- Admin claim flows for official representatives
+- Custom university branding
+- Institution-specific feature toggles
+- Cross-institution event collaboration
+
+---
+
+Institutor transforms UniHub from a single-campus product into a scalable university platform.
+___
+
 ## 🧠 Core Features
 
 ### 👤 User System
