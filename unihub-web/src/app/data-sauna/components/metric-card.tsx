@@ -5,10 +5,13 @@ interface MetricCardProps {
   value: string | number
   change: number
   icon: React.ElementType
+  /** Optional suffix e.g. "%" (default: only "Conversion rate" gets %) */
+  valueSuffix?: string
 }
 
-export function MetricCard({ title, value, change, icon: Icon }: MetricCardProps) {
+export function MetricCard({ title, value, change, icon: Icon, valueSuffix }: MetricCardProps) {
   const isPositive = change >= 0
+  const suffix = valueSuffix ?? (title === "Conversion rate" ? "%" : "")
   return (
     <Card className="border border-border/80 bg-card shadow-sm">
       <CardContent className="p-5">
@@ -17,7 +20,7 @@ export function MetricCard({ title, value, change, icon: Icon }: MetricCardProps
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
               {typeof value === "number" ? value.toLocaleString() : value}
-              {title === "Conversion rate" && "%"}
+              {suffix}
             </p>
             <p
               className={`mt-1 text-xs font-medium ${

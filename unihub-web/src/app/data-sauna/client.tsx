@@ -11,12 +11,26 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { PageLoading } from "@/components/ui/loading"
 import { Event } from "@/types/responses"
 import { eventsAPI } from "@/lib/api"
-import { AnalyticsTab, EventDetailView } from "./components"
+import { AnalyticsTab, EventDetailView, type AnalyticsCategory } from "./components"
+
+/**
+ * Data Sauna nav/state model:
+ * - activeTab: which main section is shown (analytics | events). Drives Tabs + TabsContent.
+ * - Dropdown open state (analyticsOpen, eventDetailsOpen): independent of activeTab. Toggling
+ *   a dropdown does not change activeTab.
+ * - Selecting a child (analytics category or an event) updates that section’s sub-state
+ *   (analyticsCategory, selectedEventId) and sets activeTab to that section’s parent so the
+ *   main content switches to the chosen child.
+ * - Content is rendered via Tabs (value=activeTab) and conditional rendering inside each
+ *   TabsContent (e.g. by analyticsCategory or selectedEvent).
+ */
 
 export function DataSaunaClient() {
   const { user, isLoading } = useCurrentUser()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("analytics")
+  const [activeTab, setActiveTab] = useState<"analytics" | "events">("analytics")
+  const [analyticsOpen, setAnalyticsOpen] = useState(false)
+  const [analyticsCategory, setAnalyticsCategory] = useState<AnalyticsCategory | null>(null)
   const [eventDetailsOpen, setEventDetailsOpen] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
   const [eventsDetail, setEventsDetail] = useState<Record<number, Event>>({})
@@ -40,6 +54,15 @@ export function DataSaunaClient() {
       })
       .catch(() => {})
   }, [user?.eventsCreated, activeTab])
+
+  const handleAnalyticsClick = () => {
+    setAnalyticsOpen((open) => !open)
+  }
+
+  const handleAnalyticsCategorySelect = (category: AnalyticsCategory) => {
+    setAnalyticsCategory(category)
+    setActiveTab("analytics")
+  }
 
   const handleEventDetailsClick = () => {
     setEventDetailsOpen((open) => !open)
@@ -65,7 +88,11 @@ export function DataSaunaClient() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-screen w-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as "analytics" | "events")}
+        className="flex min-h-screen w-full"
+      >
         <aside className="flex w-56 shrink-0 flex-col border-r border-border/80 bg-card py-6 md:w-64">
           <div className="px-4 mb-6">
             <h1 className="text-lg font-bold tracking-tight text-foreground">
@@ -78,19 +105,51 @@ export function DataSaunaClient() {
           <nav className="space-y-1 px-2">
             <button
               type="button"
-              onClick={() => setActiveTab("analytics")}
+              onClick={handleAnalyticsClick}
               className={cn(
-                "relative flex w-full items-center px-4 py-3 text-left text-sm rounded-lg transition-colors",
+                "relative flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm rounded-lg transition-colors",
                 activeTab === "analytics"
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted"
               )}
+              aria-expanded={analyticsOpen}
             >
-              Analytics
+              <span>Analytics</span>
+              {analyticsOpen ? (
+                <ChevronDown className="h-4 w-4 shrink-0 text-current" aria-hidden />
+              ) : (
+                <ChevronRight className="h-4 w-4 shrink-0 text-current" aria-hidden />
+              )}
               {activeTab === "analytics" && (
                 <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-primary rounded-l" />
               )}
             </button>
+            {analyticsOpen && (
+              <div className="mt-2 space-y-0.5 border-l-2 border-border/80 pl-3 ml-2">
+                {(
+                  [
+                    { value: "overview" as const, label: "Overview" },
+                    { value: "registrations" as const, label: "Registrations" },
+                    { value: "engagement" as const, label: "Engagement" },
+                    { value: "popular-events" as const, label: "Popular events" },
+                  ]
+                ).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => handleAnalyticsCategorySelect(value)}
+                    className={cn(
+                      "block w-full rounded-md px-3 py-2 text-left text-sm transition-colors",
+                      activeTab === "analytics" && analyticsCategory === value
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               type="button"
               onClick={handleEventDetailsClick}
@@ -137,7 +196,11 @@ export function DataSaunaClient() {
         <main className="min-w-0 flex-1 overflow-auto text-left">
           <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8 text-left">
             <TabsContent value="analytics" className="mt-0">
-              <AnalyticsTab />
+              {analyticsCategory ? (
+                <AnalyticsTab category={analyticsCategory} />
+              ) : (
+                <p className="text-muted-foreground">Select a category from the list.</p>
+              )}
             </TabsContent>
 
             <TabsContent value="events" className="mt-0">
