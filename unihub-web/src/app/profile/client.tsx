@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Settings, List, Calendar as CalendarIcon, Plus } from "lucide-react"
+import { Settings, List, Calendar as CalendarIcon, Plus, BarChart3 } from "lucide-react"
 import { useCurrentUser } from "@/context/user-context"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EventCard } from "@/components/ui/event-card"
@@ -107,6 +107,14 @@ export function ProfileClient() {
             </div>
 
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => router.push("/data-sauna")}
+                className="flex items-center gap-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Data Sauna
+              </Button>
               <Button
                 onClick={() => router.push("/create-event")}
                 className="flex items-center gap-2"

@@ -105,6 +105,11 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
+                    <Link href="/data-sauna" className="w-full">
+                      Data Sauna
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
                     <Link href="/settings" className="w-full">
                       Settings
                     </Link>
@@ -179,6 +184,11 @@ export function Header() {
                     <DropdownMenuItem>
                       <Link href="/profile" className="w-full">
                         Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/data-sauna" className="w-full">
+                        Data Sauna
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
