@@ -60,7 +60,7 @@ export default function AboutPage() {
         <div className="container max-w-3xl px-4 md:px-6 mx-auto">
           <header className="mb-12">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-              About UniHub
+              About
             </h1>
             <p className="text-lg text-muted-foreground italic border-l-4 border-primary pl-4">
               A campus events platform that helps students and leaders discover,
@@ -178,10 +178,6 @@ export default function AboutPage() {
               <li>Analytics and insights</li>
               <li>UniHub DataSauna (in planning)</li>
             </Ul>
-          </Section>
-
-          <Section title="Built by">
-            <p>UniHub was built by Anik Dey.</p>
           </Section>
         </div>
       </div>

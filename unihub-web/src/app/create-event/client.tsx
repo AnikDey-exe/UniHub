@@ -522,6 +522,7 @@ export function CreateEventClient() {
                   {createEventMutation.isPending ? "Creating..." : "Create Event"}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground text-center pt-2">Powered by Formiq</p>
             </form>
           </CardContent>
         </Card>
