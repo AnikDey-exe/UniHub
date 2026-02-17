@@ -54,6 +54,12 @@ export function Header() {
               >
                 Colleges
               </Link>
+              <Link
+                href="/about"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                About
+              </Link>
             </nav>
 
             {/* Right side - Auth buttons */}
@@ -216,11 +222,11 @@ export function Header() {
                       Colleges
                     </Link>
                   </DropdownMenuItem>
-                  {/* <DropdownMenuItem>
+                  <DropdownMenuItem>
                     <Link href="/about" className="w-full">
                       About
                     </Link>
-                  </DropdownMenuItem> */}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
