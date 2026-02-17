@@ -260,6 +260,7 @@ Infrastructure:
 - Real-time updates (WebSockets)
 - Analytics dashboard
 - Mobile responsiveness refinement
+- UniHub DataSauna
 
 ---
 
